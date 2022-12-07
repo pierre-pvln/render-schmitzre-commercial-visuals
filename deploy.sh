@@ -1,29 +1,13 @@
+#!/bin/bash
 # =============================================================================
 #
 # @package    fastfood-visualization-rework-schmitz-re
 #             for Schmitz Real Estate on render 
 # 
-# @version    v0.0.2  2022-12-07
+# @version    v0.0.1  2022-12-07
 # @author     pierre@ipheion.eu
 # @copyright  (C) 2022-2022 Pierre Veelen
 #
 # =============================================================================
-
-# GENERIC DATA WRANGLING
-pandas==1.2.5
-
-# GEO DATA WRANGLING
-shapely==1.8.2
-
-# DATA VISUALISATION
-plotly==5.7.0
-dash==2.3.1
-dash-bootstrap-components==1.1.0
-dash-daq==0.5.0
-
-# WEB DATA
-urllib3==1.26.9
-certifi
-
-# RENDER SPECIFIC 
-gunicorn==20.1.0
+/opt/render/project/src/.venv/bin/python3.9 -m pip install --upgrade pip
+pip install -r requirements.txt
