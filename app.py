@@ -61,7 +61,7 @@ print("[INFO   ] Run environment:",run_environment)
 ####################################################
 # initialize some globally used vars
 
-if run_environment=="test"
+if run_environment=="test":
     glb_verbose = True  # True
     glb_fxn_verbose = 3  # 3
     # 0 = Don't output any text
