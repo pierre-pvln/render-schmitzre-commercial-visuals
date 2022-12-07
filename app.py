@@ -52,20 +52,32 @@ from dcc_graphs.configs.modebars import mapbox_modebar
 from dcc_graphs.figures.data_list_of_dicts.update import *
 from dcc_graphs.figures.initial_figures import empty_map
 
+run_environment = "production"
 print("[INFO   ] ==== START ===")
+print("[INFO   ] Run environment:",run_environment)
+
 ####################################################
 # DEFINE GENERICALLY USED VARS
 ####################################################
 # initialize some globally used vars
 
-glb_verbose = True  # True
-glb_fxn_verbose = 3  # 3
-# 0 = Don't output any text
-# 1 = Show only function name
-# 2 = Show function input values
-# 3 = Show additional info
+if run_environment=="test"
+    glb_verbose = True  # True
+    glb_fxn_verbose = 3  # 3
+    # 0 = Don't output any text
+    # 1 = Show only function name
+    # 2 = Show function input values
+    # 3 = Show additional info
+    glb_hide_debug_text = False
+else:
+    glb_verbose = False
+    glb_fxn_verbose = 0
+    # 0 = Don't output any text
+    # 1 = Show only function name
+    # 2 = Show function input values
+    # 3 = Show additional info
+    glb_hide_debug_text = True
 
-glb_hide_debug_text = False
 
 o_glb_selected_municipality_name = strings.HEADER_SUBTITLE  # the value of the municipality name in the selectionbox
 
