@@ -604,6 +604,7 @@ def update_overall_map(the_zoom, the_center, fxn_verbose=0):
 def contour_graph(contour_type, lon, lat, contour_color="black", fxn_verbose=0):
     if fxn_verbose > 0:
         print("[INFO   ] Start function contour_graph")
+        
     if fxn_verbose > 1:
         print("== INPUT ====================")
         print("contour_type :", contour_type)
@@ -1131,7 +1132,7 @@ def update_overview(
                 lon=glb_latest_lon,
                 lat=glb_latest_lat,
                 contour_color="black",
-                fxn_verbose=3)
+                fxn_verbose=glb_fxn_verbose)
 
         else:  # locate-municipality value deselected
             # reset map to initial status / reset view
@@ -1263,7 +1264,7 @@ def update_overview(
                 lon=glb_latest_lon,   # I have to check if there is always a value
                 lat=glb_latest_lat,
                 contour_color="black",
-                fxn_verbose=3)
+                fxn_verbose=glb_fxn_verbose)
         else:
             glb_calc_zoom = glb_init_calc_zoom
 
@@ -1320,7 +1321,7 @@ def update_overview(
                 lon=glb_latest_lon,   # I have to check if there is always a value
                 lat=glb_latest_lat,
                 contour_color="black",
-                fxn_verbose=3)
+                fxn_verbose=glb_fxn_verbose)
 
         # When point clicked is on Municipality Curves
         if curve_name in [
