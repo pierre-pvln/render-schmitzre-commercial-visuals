@@ -603,8 +603,8 @@ def update_overall_map(the_zoom, the_center, fxn_verbose=0):
 
 def contour_graph(contour_type, lon, lat, contour_color="black", fxn_verbose=0):
     if fxn_verbose > 0:
-        print("[INFO   ] Start function update_overview")
-    if glb_fxn_verbose > 1:
+        print("[INFO   ] Start function contour_graph")
+    if fxn_verbose > 1:
         print("== INPUT ====================")
         print("contour_type :", contour_type)
         print("lon          :", lon)
@@ -1030,6 +1030,7 @@ def update_overview(
 
     if glb_fxn_verbose > 0:
         print("[INFO   ] Start function update_overview")
+        
     if glb_fxn_verbose > 1:
         print("== INPUT ====================")
         print("i_company_active            :", i_company_active)
@@ -1363,7 +1364,7 @@ def update_overview(
         glb_datatable_geojson,
         datatable_mun,
         datatable_typ,
-        0  # glb_fxn_verbose
+        glb_fxn_verbose
     )
     glb_updated_tabledata = o_updated_tabledata.copy()
 
@@ -1380,7 +1381,7 @@ def update_overview(
         update_overall_map(
             the_zoom=glb_calc_zoom,
             the_center=glb_calc_center,
-            fxn_verbose=0  # glb_fxn_verbose
+            fxn_verbose=glb_fxn_verbose
         ),
         o_updated_tabledata.to_dict("records"),
         o_updated_tabledata_total.to_dict("records"),
