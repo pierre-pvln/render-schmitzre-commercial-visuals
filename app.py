@@ -54,14 +54,14 @@ from dcc_graphs.figures.initial_figures import empty_map
 
 run_environment = "production"
 print("[INFO   ] ==== START ===")
-print("[INFO   ] Run environment:",run_environment)
+print("[INFO   ] Run environment:", run_environment)
 
 ####################################################
 # DEFINE GENERICALLY USED VARS
 ####################################################
 # initialize some globally used vars
 
-if run_environment=="test":
+if run_environment == "test":
     glb_verbose = True  # True
     glb_fxn_verbose = 3  # 3
     # 0 = Don't output any text
@@ -92,6 +92,14 @@ if run_on.lower() in ["heroku"]:
 python_version = sys.version.split()[0]
 dash_version = dash.__version__
 plotly_version = plotly.__version__
+
+print("Running on     : " + the_hostname)
+print("Run on env var : " + run_on)
+print("App version    : " + app_version)
+print("Python version : " + python_version)
+print("dash version   : " + dash_version)
+print("plotly version : " + plotly_version)
+
 
 # folders for output
 input_dir = "./data/final/"
@@ -1683,13 +1691,6 @@ def status_prediction_selection(
 # START THE APP
 ####################################################
 if __name__ == "__main__":
-    print("Running on     : " + the_hostname)
-    print("Run on env var : " + run_on)
-    print("App version    : " + app_version)
-    print("Python version : " + python_version)
-    print("dash version   : " + dash_version)
-    print("plotly version : " + plotly_version)
-
     # #################################
     # depending on where code is running
     # should be optimized in final version
