@@ -9,7 +9,7 @@
 # v46
 # - cleaned up version of v45
 
-app_version = "v46"
+app_version = "v47"
 # put the name of this python file in txt file for processing by other scripts
 with open("_current_app_version.txt", "w") as version_file:
     version_file.write(app_version + "\n")
@@ -214,9 +214,12 @@ datatable_radio_options = [
     {"label": "Box 10Km", "value": "bbox10"},
     {"label": "Circle 20Km", "value": "circle20"},
     {"label": "Circle 10Km", "value": "circle10"},
-    {"label": "Isochrone 30min", "value": "iso30"},
-    {"label": "Isochrone 20min", "value": "iso20"},
-    {"label": "Isochrone 10min", "value": "iso10"},
+    {"label": "Car 30min", "value": "car-iso30"},
+    {"label": "Car 20min", "value": "car-iso20"},
+    {"label": "Car 10min", "value": "car-iso10"},
+    {"label": "Bike 20min", "value": "bike-iso20"},
+    {"label": "Bike 10min", "value": "bike-iso10"},
+    {"label": "Walk 10min", "value": "walk-iso10"},
 ]
 
 default_radio_item_selection = "empty"
@@ -613,6 +616,11 @@ def contour_graph(contour_type, lon, lat, contour_color="black", fxn_verbose=0):
         print("contour_color:", contour_color)
         print("== DONE =====================")
 
+    geojson_layers_list = []
+    datatable_geojson = {}
+    # reset isochrone legend text
+    isochrone_legend = []
+
     # create a new layers list everytime a point is clicked based on selection of radiobutton
     if contour_type == "empty":
         geojson_layers_list = []
@@ -676,11 +684,12 @@ def contour_graph(contour_type, lon, lat, contour_color="black", fxn_verbose=0):
         # reset isochrone legend text
         isochrone_legend = []
 
-    if contour_type == "iso10":
+    if contour_type == "car-iso10":
         a_layer, geojson_not_used = isochrone_and_geojson(
             lon_point=lon,
             lat_point=lat,
             polygontype_str="fill",
+            profile_str = "car",
             minutes_str="5",
             hex_colors_str="00ff00",
             mapbox_access_token=glb_mapbox_access_token
@@ -691,6 +700,7 @@ def contour_graph(contour_type, lon, lat, contour_color="black", fxn_verbose=0):
             lon_point=lon,
             lat_point=lat,
             polygontype_str="fill",
+            profile_str = "car",
             minutes_str="10",
             hex_colors_str="ffa500",
             mapbox_access_token=glb_mapbox_access_token
@@ -704,11 +714,12 @@ def contour_graph(contour_type, lon, lat, contour_color="black", fxn_verbose=0):
             html.Div(["Orange zone: within 10 minutes drive by car"], style={"color": "orange", "marginRight": "10px"}),
         ]
 
-    if contour_type == "iso20":
+    if contour_type == "car-iso20":
         a_layer, geojson_not_used = isochrone_and_geojson(
             lon_point=lon,
             lat_point=lat,
             polygontype_str="fill",
+            profile_str = "car",
             minutes_str="5",
             hex_colors_str="00ff00",
             mapbox_access_token=glb_mapbox_access_token
@@ -719,6 +730,7 @@ def contour_graph(contour_type, lon, lat, contour_color="black", fxn_verbose=0):
             lon_point=lon,
             lat_point=lat,
             polygontype_str="fill",
+            profile_str = "car",
             minutes_str="10",
             hex_colors_str="ffa500",
             mapbox_access_token=glb_mapbox_access_token
@@ -729,6 +741,7 @@ def contour_graph(contour_type, lon, lat, contour_color="black", fxn_verbose=0):
             lon_point=lon,
             lat_point=lat,
             polygontype_str="line",
+            profile_str = "car",
             minutes_str="20",
             hex_colors_str="ff0000",
             mapbox_access_token=glb_mapbox_access_token
@@ -743,11 +756,12 @@ def contour_graph(contour_type, lon, lat, contour_color="black", fxn_verbose=0):
             html.Div(["Red zone: within 20 minutes drive by car"], style={"color": "red", "marginRight": "10px"}),
         ]
 
-    if contour_type == "iso30":
+    if contour_type == "car-iso30":
         a_layer, geojson_not_used = isochrone_and_geojson(
             lon_point=lon,
             lat_point=lat,
             polygontype_str="fill",
+            profile_str = "car",
             minutes_str="10",
             hex_colors_str="00ff00",
             mapbox_access_token=glb_mapbox_access_token
@@ -758,6 +772,7 @@ def contour_graph(contour_type, lon, lat, contour_color="black", fxn_verbose=0):
             lon_point=lon,
             lat_point=lat,
             polygontype_str="fill",
+            profile_str = "car",
             minutes_str="20",
             hex_colors_str="ffa500",
             mapbox_access_token=glb_mapbox_access_token
@@ -768,6 +783,7 @@ def contour_graph(contour_type, lon, lat, contour_color="black", fxn_verbose=0):
             lon_point=lon,
             lat_point=lat,
             polygontype_str="line",
+            profile_str = "car",
             minutes_str="30",
             hex_colors_str="ff0000",
             mapbox_access_token=glb_mapbox_access_token
@@ -780,6 +796,108 @@ def contour_graph(contour_type, lon, lat, contour_color="black", fxn_verbose=0):
             html.Div(["Green zone: within 10 minutes drive by car"], style={"color": "green", "marginRight": "10px"}),
             html.Div(["Orange zone: within 20 minutes drive by car"], style={"color": "orange", "marginRight": "10px"}),
             html.Div(["Red zone: within 30 minutes drive by car"], style={"color": "red", "marginRight": "10px"}),
+        ]
+
+    if contour_type == "bike-iso10":
+        a_layer, geojson_not_used = isochrone_and_geojson(
+            lon_point=lon,
+            lat_point=lat,
+            polygontype_str="fill",
+            profile_str="bike",
+            minutes_str="5",
+            hex_colors_str="00ff00",
+            mapbox_access_token=glb_mapbox_access_token
+        )
+        geojson_layers_list = a_layer
+
+        a_layer, datatable_geojson = isochrone_and_geojson(
+            lon_point=lon,
+            lat_point=lat,
+            polygontype_str="fill",
+            profile_str="bike",
+            minutes_str="10",
+            hex_colors_str="ffa500",
+            mapbox_access_token=glb_mapbox_access_token
+        )
+        geojson_layers_list = geojson_layers_list + a_layer
+
+        # set isochrone legend text
+        isochrone_legend = [
+            html.Div(["ISOCHRONE LINES:"], style={"fontWeight": "bold", "color": "black", "marginRight": "10px"}),
+            html.Div(["Green zone: within 5 minutes cycling"], style={"color": "green", "marginRight": "10px"}),
+            html.Div(["Orange zone: within 10 minutes cycling"], style={"color": "orange", "marginRight": "10px"}),
+        ]
+
+    if contour_type == "bike-iso20":
+        a_layer, geojson_not_used = isochrone_and_geojson(
+            lon_point=lon,
+            lat_point=lat,
+            polygontype_str="fill",
+            profile_str="bike",
+            minutes_str="5",
+            hex_colors_str="00ff00",
+            mapbox_access_token=glb_mapbox_access_token
+        )
+        geojson_layers_list = a_layer
+
+        a_layer, geojson_not_used = isochrone_and_geojson(
+            lon_point=lon,
+            lat_point=lat,
+            polygontype_str="fill",
+            profile_str="bike",
+            minutes_str="10",
+            hex_colors_str="ffa500",
+            mapbox_access_token=glb_mapbox_access_token
+        )
+        geojson_layers_list = geojson_layers_list + a_layer
+
+        a_layer, datatable_geojson = isochrone_and_geojson(
+            lon_point=lon,
+            lat_point=lat,
+            polygontype_str="line",
+            profile_str="bike",
+            minutes_str="20",
+            hex_colors_str="ff0000",
+            mapbox_access_token=glb_mapbox_access_token
+        )
+        geojson_layers_list = geojson_layers_list + a_layer
+
+        # set isochrone legend text
+        isochrone_legend = [
+            html.Div(["ISOCHRONE LINES:"], style={"fontWeight": "bold", "color": "black", "marginRight": "10px"}),
+            html.Div(["Green zone: within 5 minutes cycling"], style={"color": "green", "marginRight": "10px"}),
+            html.Div(["Orange zone: within 10 minutes cycling"], style={"color": "orange", "marginRight": "10px"}),
+            html.Div(["Red zone: within 20 minutes cycling"], style={"color": "red", "marginRight": "10px"}),
+        ]
+
+    if contour_type == "walk-iso10":
+        a_layer, geojson_not_used = isochrone_and_geojson(
+            lon_point=lon,
+            lat_point=lat,
+            polygontype_str="fill",
+            profile_str="walk",
+            minutes_str="5",
+            hex_colors_str="00ff00",
+            mapbox_access_token=glb_mapbox_access_token
+        )
+        geojson_layers_list = a_layer
+
+        a_layer, geojson_not_used = isochrone_and_geojson(
+            lon_point=lon,
+            lat_point=lat,
+            polygontype_str="fill",
+            profile_str="walk",
+            minutes_str="10",
+            hex_colors_str="ffa500",
+            mapbox_access_token=glb_mapbox_access_token
+        )
+        geojson_layers_list = geojson_layers_list + a_layer
+
+        # set isochrone legend text
+        isochrone_legend = [
+            html.Div(["ISOCHRONE LINES:"], style={"fontWeight": "bold", "color": "black", "marginRight": "10px"}),
+            html.Div(["Green zone: within 5 minutes walking"], style={"color": "green", "marginRight": "10px"}),
+            html.Div(["Orange zone: within 10 minutes walking"], style={"color": "orange", "marginRight": "10px"}),
         ]
 
     return datatable_geojson, geojson_layers_list, isochrone_legend

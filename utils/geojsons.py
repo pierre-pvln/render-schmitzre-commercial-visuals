@@ -96,7 +96,7 @@ def circle_and_geojson(center_lon, center_lat, r=0.1, color="red", verbose=False
 
 
 def isochrone_and_geojson(
-    lon_point, lat_point, polygontype_str, minutes_str, hex_colors_str, mapbox_access_token, verbose=False
+    lon_point, lat_point, polygontype_str, profile_str, minutes_str, hex_colors_str, mapbox_access_token, verbose=False
 ):
     # https://api.mapbox.com/isochrone/v1/mapbox/driving/-118.22258,33.99038?contours_minutes=5,10,15&contours_colors=6706ce,04e813,4286f4&polygons=true&access_token=pk.eyJ1IjoicGllcnJldmVlbGVuIiwiYSI6ImNra3V6Z2JhNTFjeXUycHBjdWVkOXUxdDMifQ.tzOHbTKha9Co8-s_AarPJg
     if polygontype_str == "fill":
@@ -104,7 +104,16 @@ def isochrone_and_geojson(
     else:
         opacity = 0.5
 
-    profile = "driving"  # either 'driving' 'cycling' 'walking'
+    # either 'driving' 'cycling' 'walking'
+    if profile_str == "car":
+        profile = "driving"
+    elif profile_str == "bike":
+        profile = "cycling"
+    elif profile_str == "walk":
+        profile = "walking" 
+    else:
+        profile="driving"
+        
     url = (
         "https://api.mapbox.com/isochrone/v1/mapbox/"
         + profile
