@@ -1,15 +1,17 @@
-# v44 
+# v44
 # ===
 # - changed the name of global vars to glb_
-# - removed var ref_in_fname 
+# - removed var ref_in_fname
 # v45
 # ===
 # - removed var municipality_text; replaced by o_glb_selected_municipality_name
 # - cleanup actions when callback is triggered
 # v46
 # - cleaned up version of v45
+# v48
+# - zoom updated per radio switch item
 
-app_version = "v47"
+app_version = "v48"
 # put the name of this python file in txt file for processing by other scripts
 with open("_current_app_version.txt", "w") as version_file:
     version_file.write(app_version + "\n")
@@ -20,37 +22,34 @@ with open("_current_app_version.txt", "w") as version_file:
 
 import json
 import os
-import sys
 import socket
+import sys
 from datetime import datetime
 
 # Visualization modules
 import dash
-import plotly
-from dash import Dash
 import dash_bootstrap_components as dbc
-
 # data wrangling modules
 import numpy as np
 import pandas as pd
-
-from dash import dcc, html
+import plotly
+from dash import Dash, dcc, html
 from dash.dash_table.Format import Align, Format, Group
 from dash.dependencies import Input, Output, State
 from numpy import cos, pi, sin
-
 # geo stuff
 # https://stackoverflow.com/questions/43892459/check-if-geo-point-is-inside-or-outside-of-polygon
 from shapely.geometry import Point, shape
 
 # local settings from subfolders of this app
 from config import strings
-from html_layouts import footer, header, rows, debug
-from utils.geo_mapbox import zoom_center
-from utils.geojsons import boundingbox_and_geojson, circle_and_geojson, isochrone_and_geojson
 from dcc_graphs.configs.modebars import mapbox_modebar
 from dcc_graphs.figures.data_list_of_dicts.update import *
 from dcc_graphs.figures.initial_figures import empty_map
+from html_layouts import debug, footer, header, rows
+from utils.geo_mapbox import zoom_center
+from utils.geojsons import (boundingbox_and_geojson, circle_and_geojson,
+                            isochrone_and_geojson)
 
 run_environment = "production"
 print("[INFO   ] ==== START ===")
@@ -61,9 +60,17 @@ print("[INFO   ] Run environment:", run_environment)
 ####################################################
 # initialize some globally used vars
 
-if run_environment == "test":
+if run_environment == "tst":
     glb_verbose = True  # True
     glb_fxn_verbose = 3  # 3
+    # 0 = Don't output any text
+    # 1 = Show only function name
+    # 2 = Show function input values
+    # 3 = Show additional info
+    glb_hide_debug_text = False
+elif run_environment == "acc":
+    glb_verbose = True  # True
+    glb_fxn_verbose = 2  # 2
     # 0 = Don't output any text
     # 1 = Show only function name
     # 2 = Show function input values
@@ -79,7 +86,9 @@ else:
     glb_hide_debug_text = True
 
 
-o_glb_selected_municipality_name = strings.HEADER_SUBTITLE  # the value of the municipality name in the selectionbox
+o_glb_selected_municipality_name = (
+    strings.HEADER_SUBTITLE
+)  # the value of the municipality name in the selectionbox
 
 glb_mapbox_access_token = os.getenv("MAPBOX_ACCESS_TOKEN", default=None)
 
@@ -117,9 +126,7 @@ baseline = "Baseline"
 # ==================================================
 # read company data from file
 df_company = pd.read_csv(input_dir + company_subset + ".csv")
-df_company = df_company.rename(
-    columns={"latitude": "lat", "longitude": "lon"}
-)
+df_company = df_company.rename(columns={"latitude": "lat", "longitude": "lon"})
 # remove any empty values
 df_company.dropna(subset=["uniform_city_name"], inplace=True)
 df_company_filtered = pd.DataFrame(columns=df_company.columns)
@@ -149,7 +156,9 @@ if glb_verbose:
     print("[INFO   ]", df_municipality.columns)
 
 # create an empty dataframe for selected municipality
-df_selected_municipality = pd.DataFrame(columns=df_municipality.columns)  # df for selected municipality in dropdownbox
+df_selected_municipality = pd.DataFrame(
+    columns=df_municipality.columns
+)  # df for selected municipality in dropdownbox
 df_point_on_map_filtered = pd.DataFrame(columns=df_municipality.columns)  #
 
 municipality_options = [
@@ -182,7 +191,9 @@ if glb_verbose:
     print("[INFO   ] len(glb_df_netzknoten) :", len(glb_df_netzknoten))
     print("[INFO   ]", glb_df_netzknoten.columns)
 
-netzknoten_options = [{"label": i, "value": i} for i in glb_df_netzknoten["NK_GeoStrKls"].unique()]
+netzknoten_options = [
+    {"label": i, "value": i} for i in glb_df_netzknoten["NK_GeoStrKls"].unique()
+]
 all_netzknoten_values = glb_df_netzknoten["NK_GeoStrKls"].unique().tolist()
 
 
@@ -238,7 +249,9 @@ default_radio_item_selection = "empty"
 #
 # ===================================
 # set the zoom level to show all points on the map
-glb_init_calc_zoom, glb_init_calc_center = zoom_center(lons=df_company["lon"], lats=df_company["lat"])
+glb_init_calc_zoom, glb_init_calc_center = zoom_center(
+    lons=df_company["lon"], lats=df_company["lat"]
+)
 glb_calc_zoom = glb_init_calc_zoom
 glb_calc_center = glb_init_calc_center
 
@@ -252,8 +265,12 @@ datatable_lon = None
 datatable_lat = None
 datatable_mun = ""
 datatable_typ = default_radio_item_selection
-glb_datatable_geojson = {}  # geojson holding the contours on the map with the data in the datatable
+glb_datatable_geojson = (
+    {}
+)  # geojson holding the contours on the map with the data in the datatable
 
+# do not show datatable if radiobutton selection is "empty"
+glb_datatable_visibility = "hidden" if datatable_typ == "empty" else "visible"
 
 municipality_type_selection_text = "municipality-type"
 company_selection_text = "company"
@@ -266,11 +283,17 @@ glb_geojson_layers_list = []
 
 # ===================================
 #
-# FUNTIONS FOR HANDLING DATATABLE
+# FUNCTIONS FOR HANDLING DATATABLE
 #
 # ===================================
 def select_datatable_subset(
-    inputdf, lon, lat, geojson, municipality, selectiontype=default_radio_item_selection, fxn_verbose=0
+    inputdf,
+    lon,
+    lat,
+    geojson,
+    municipality,
+    selectiontype=default_radio_item_selection,
+    fxn_verbose=0,
 ):
     """
     inputdf:       dataframe with the info of all places
@@ -289,7 +312,7 @@ def select_datatable_subset(
     """
 
     if fxn_verbose > 0:
-        print("[FUNCTION] select_datatable_subset")
+        print("\n[FUNCTION] select_datatable_subset")
 
     if fxn_verbose > 1:
         print("len inputdf    :", len(inputdf))
@@ -358,7 +381,11 @@ def select_datatable_subset(
                 print("Polygon contains:", len(subset_df), "municipalities")
 
             # and sort on einwohner and name
-            subset_df.sort_values(by=["insgesamt", "uniform_city_name"], ascending=[False, True], inplace=True)
+            subset_df.sort_values(
+                by=["insgesamt", "uniform_city_name"],
+                ascending=[False, True],
+                inplace=True,
+            )
 
         else:
             if fxn_verbose > 2:
@@ -505,7 +532,6 @@ def settings_table_columns():
             type="numeric",
             format=Format(group_delimiter=".", group=Group.yes, groups=[3]),
         ),
-
     ]
 
     return table_column_settings
@@ -514,18 +540,18 @@ def settings_table_columns():
 def update_municipalities_in_table_data_dict_list(inputdf, fxn_verbose=0):
     # shows all the municipalities that are present in the data table on the map
     if fxn_verbose > 0:
-        print("[FUNCTION] update_municipalities_in_table_data_dict_list")
+        print("\n[FUNCTION] update_municipalities_in_table_data_dict_list")
 
     if fxn_verbose > 1:
-        print("len inputdf:"+str(len(inputdf)))
+        print("len inputdf    :" + str(len(inputdf)))
         print(inputdf.columns)
 
-    toprow   = "<b>" + inputdf["uniform_city_name"] + "</b><br>"
+    toprow = "<b>" + inputdf["uniform_city_name"] + "</b><br>"
     inwoners = "<br>" + "Einwohner    : " + inputdf["insgesamt"].astype(int).astype(str)
-    cnt_bk   = "<br>" + "# Burgerking : " + inputdf["count_BK"].astype(int).astype(str)
-    cnt_mcd  = "<br>" + "# Mc Donalds : " + inputdf["count_McD"].astype(int).astype(str)
-    cnt_kfc  = "<br>" + "# KFC        : " + inputdf["count_KFC"].astype(int).astype(str)
-    cnt_mft  = "<br>" + "# MacFIT     : " + inputdf["count_MFT"].astype(int).astype(str)
+    cnt_bk = "<br>" + "# Burgerking : " + inputdf["count_BK"].astype(int).astype(str)
+    cnt_mcd = "<br>" + "# Mc Donalds : " + inputdf["count_McD"].astype(int).astype(str)
+    cnt_kfc = "<br>" + "# KFC        : " + inputdf["count_KFC"].astype(int).astype(str)
+    cnt_mft = "<br>" + "# MacFIT     : " + inputdf["count_MFT"].astype(int).astype(str)
 
     # create column with specific hovertext
     inputdf["hovertext"] = toprow + inwoners + cnt_bk + cnt_mcd + cnt_kfc + cnt_mft
@@ -582,17 +608,31 @@ def update_municipalities_in_table_data_dict_list(inputdf, fxn_verbose=0):
 # ===================
 def update_overall_map(the_zoom, the_center, fxn_verbose=0):
     if fxn_verbose > 0:
-        print("[FUNCTION] update_overall_map")
+        print("\n[FUNCTION] update_overall_map")
 
     return {
-        "data": prediction_10km_data_dict_list(df_prediction_10Km_filtered, prediction_subset_10Km, fxn_verbose)
-        + prediction_20km_data_dict_list(df_prediction_20Km_filtered, prediction_subset_20Km, fxn_verbose)
-        + netzknoten_data_dict_list(glb_df_netzknoten_filtered, netzknoten_subset, fxn_verbose)
+        "data": prediction_10km_data_dict_list(
+            df_prediction_10Km_filtered, prediction_subset_10Km, fxn_verbose
+        )
+        + prediction_20km_data_dict_list(
+            df_prediction_20Km_filtered, prediction_subset_20Km, fxn_verbose
+        )
+        + netzknoten_data_dict_list(
+            glb_df_netzknoten_filtered, netzknoten_subset, fxn_verbose
+        )
         + company_data_dict_list(df_company_filtered, company_subset, fxn_verbose)
-        + municipality_data_dict_list(glb_df_municipality_filtered, municipality_subset, fxn_verbose)
-        + selected_municipality_data_dict_list(df_selected_municipality, selected_municipality_subset, fxn_verbose)
-        + update_municipalities_in_table_data_dict_list(glb_updated_tabledata, fxn_verbose)
-        + point_on_map_data_dict_list(df_point_on_map_filtered, "selected Location", fxn_verbose),
+        + municipality_data_dict_list(
+            glb_df_municipality_filtered, municipality_subset, fxn_verbose
+        )
+        + selected_municipality_data_dict_list(
+            df_selected_municipality, selected_municipality_subset, fxn_verbose
+        )
+        + update_municipalities_in_table_data_dict_list(
+            glb_updated_tabledata, fxn_verbose
+        )
+        + point_on_map_data_dict_list(
+            df_point_on_map_filtered, "selected Location", fxn_verbose
+        ),
         "layout": dict(
             autosize=True,
             hovermode="closest",
@@ -615,7 +655,7 @@ def update_overall_map(the_zoom, the_center, fxn_verbose=0):
 def contour_graph(contour_type, lon, lat, contour_color="black", fxn_verbose=0):
     if fxn_verbose > 0:
         print("[INFO   ] Start function contour_graph")
-        
+
     if fxn_verbose > 1:
         print("== INPUT ====================")
         print("contour_type :", contour_type)
@@ -697,10 +737,10 @@ def contour_graph(contour_type, lon, lat, contour_color="black", fxn_verbose=0):
             lon_point=lon,
             lat_point=lat,
             polygontype_str="fill",
-            profile_str = "car",
+            profile_str="car",
             minutes_str="5",
             hex_colors_str="00ff00",
-            mapbox_access_token=glb_mapbox_access_token
+            mapbox_access_token=glb_mapbox_access_token,
         )
         geojson_layers_list = a_layer
 
@@ -708,18 +748,27 @@ def contour_graph(contour_type, lon, lat, contour_color="black", fxn_verbose=0):
             lon_point=lon,
             lat_point=lat,
             polygontype_str="fill",
-            profile_str = "car",
+            profile_str="car",
             minutes_str="10",
             hex_colors_str="ffa500",
-            mapbox_access_token=glb_mapbox_access_token
+            mapbox_access_token=glb_mapbox_access_token,
         )
         geojson_layers_list = geojson_layers_list + a_layer
 
         # set isochrone legend text
         isochrone_legend = [
-            html.Div(["ISOCHRONE LINES:"], style={"fontWeight": "bold", "color": "black", "marginRight": "10px"}),
-            html.Div(["Green zone: within 5 minutes drive by car"], style={"color": "green", "marginRight": "10px"}),
-            html.Div(["Orange zone: within 10 minutes drive by car"], style={"color": "orange", "marginRight": "10px"}),
+            html.Div(
+                ["ISOCHRONE LINES:"],
+                style={"fontWeight": "bold", "color": "black", "marginRight": "10px"},
+            ),
+            html.Div(
+                ["Green zone: within 5 minutes drive by car"],
+                style={"color": "green", "marginRight": "10px"},
+            ),
+            html.Div(
+                ["Orange zone: within 10 minutes drive by car"],
+                style={"color": "orange", "marginRight": "10px"},
+            ),
         ]
 
     if contour_type == "car-iso20":
@@ -727,10 +776,10 @@ def contour_graph(contour_type, lon, lat, contour_color="black", fxn_verbose=0):
             lon_point=lon,
             lat_point=lat,
             polygontype_str="fill",
-            profile_str = "car",
+            profile_str="car",
             minutes_str="5",
             hex_colors_str="00ff00",
-            mapbox_access_token=glb_mapbox_access_token
+            mapbox_access_token=glb_mapbox_access_token,
         )
         geojson_layers_list = a_layer
 
@@ -738,10 +787,10 @@ def contour_graph(contour_type, lon, lat, contour_color="black", fxn_verbose=0):
             lon_point=lon,
             lat_point=lat,
             polygontype_str="fill",
-            profile_str = "car",
+            profile_str="car",
             minutes_str="10",
             hex_colors_str="ffa500",
-            mapbox_access_token=glb_mapbox_access_token
+            mapbox_access_token=glb_mapbox_access_token,
         )
         geojson_layers_list = geojson_layers_list + a_layer
 
@@ -749,19 +798,31 @@ def contour_graph(contour_type, lon, lat, contour_color="black", fxn_verbose=0):
             lon_point=lon,
             lat_point=lat,
             polygontype_str="line",
-            profile_str = "car",
+            profile_str="car",
             minutes_str="20",
             hex_colors_str="ff0000",
-            mapbox_access_token=glb_mapbox_access_token
+            mapbox_access_token=glb_mapbox_access_token,
         )
         geojson_layers_list = geojson_layers_list + a_layer
 
         # set isochrone legend text
         isochrone_legend = [
-            html.Div(["ISOCHRONE LINES:"], style={"fontWeight": "bold", "color": "black", "marginRight": "10px"}),
-            html.Div(["Green zone: within 5 minutes drive by car"], style={"color": "green", "marginRight": "10px"}),
-            html.Div(["Orange zone: within 10 minutes drive by car"], style={"color": "orange", "marginRight": "10px"}),
-            html.Div(["Red zone: within 20 minutes drive by car"], style={"color": "red", "marginRight": "10px"}),
+            html.Div(
+                ["ISOCHRONE LINES:"],
+                style={"fontWeight": "bold", "color": "black", "marginRight": "10px"},
+            ),
+            html.Div(
+                ["Green zone: within 5 minutes drive by car"],
+                style={"color": "green", "marginRight": "10px"},
+            ),
+            html.Div(
+                ["Orange zone: within 10 minutes drive by car"],
+                style={"color": "orange", "marginRight": "10px"},
+            ),
+            html.Div(
+                ["Red zone: within 20 minutes drive by car"],
+                style={"color": "red", "marginRight": "10px"},
+            ),
         ]
 
     if contour_type == "car-iso30":
@@ -769,10 +830,10 @@ def contour_graph(contour_type, lon, lat, contour_color="black", fxn_verbose=0):
             lon_point=lon,
             lat_point=lat,
             polygontype_str="fill",
-            profile_str = "car",
+            profile_str="car",
             minutes_str="10",
             hex_colors_str="00ff00",
-            mapbox_access_token=glb_mapbox_access_token
+            mapbox_access_token=glb_mapbox_access_token,
         )
         geojson_layers_list = a_layer
 
@@ -780,10 +841,10 @@ def contour_graph(contour_type, lon, lat, contour_color="black", fxn_verbose=0):
             lon_point=lon,
             lat_point=lat,
             polygontype_str="fill",
-            profile_str = "car",
+            profile_str="car",
             minutes_str="20",
             hex_colors_str="ffa500",
-            mapbox_access_token=glb_mapbox_access_token
+            mapbox_access_token=glb_mapbox_access_token,
         )
         geojson_layers_list = geojson_layers_list + a_layer
 
@@ -791,19 +852,31 @@ def contour_graph(contour_type, lon, lat, contour_color="black", fxn_verbose=0):
             lon_point=lon,
             lat_point=lat,
             polygontype_str="line",
-            profile_str = "car",
+            profile_str="car",
             minutes_str="30",
             hex_colors_str="ff0000",
-            mapbox_access_token=glb_mapbox_access_token
+            mapbox_access_token=glb_mapbox_access_token,
         )
         geojson_layers_list = geojson_layers_list + a_layer
 
         # set isochrone legend text
         isochrone_legend = [
-            html.Div(["ISOCHRONE LINES:"], style={"fontWeight": "bold", "color": "black", "marginRight": "10px"}),
-            html.Div(["Green zone: within 10 minutes drive by car"], style={"color": "green", "marginRight": "10px"}),
-            html.Div(["Orange zone: within 20 minutes drive by car"], style={"color": "orange", "marginRight": "10px"}),
-            html.Div(["Red zone: within 30 minutes drive by car"], style={"color": "red", "marginRight": "10px"}),
+            html.Div(
+                ["ISOCHRONE LINES:"],
+                style={"fontWeight": "bold", "color": "black", "marginRight": "10px"},
+            ),
+            html.Div(
+                ["Green zone: within 10 minutes drive by car"],
+                style={"color": "green", "marginRight": "10px"},
+            ),
+            html.Div(
+                ["Orange zone: within 20 minutes drive by car"],
+                style={"color": "orange", "marginRight": "10px"},
+            ),
+            html.Div(
+                ["Red zone: within 30 minutes drive by car"],
+                style={"color": "red", "marginRight": "10px"},
+            ),
         ]
 
     if contour_type == "bike-iso10":
@@ -814,7 +887,7 @@ def contour_graph(contour_type, lon, lat, contour_color="black", fxn_verbose=0):
             profile_str="bike",
             minutes_str="5",
             hex_colors_str="00ff00",
-            mapbox_access_token=glb_mapbox_access_token
+            mapbox_access_token=glb_mapbox_access_token,
         )
         geojson_layers_list = a_layer
 
@@ -825,15 +898,24 @@ def contour_graph(contour_type, lon, lat, contour_color="black", fxn_verbose=0):
             profile_str="bike",
             minutes_str="10",
             hex_colors_str="ffa500",
-            mapbox_access_token=glb_mapbox_access_token
+            mapbox_access_token=glb_mapbox_access_token,
         )
         geojson_layers_list = geojson_layers_list + a_layer
 
         # set isochrone legend text
         isochrone_legend = [
-            html.Div(["ISOCHRONE LINES:"], style={"fontWeight": "bold", "color": "black", "marginRight": "10px"}),
-            html.Div(["Green zone: within 5 minutes cycling"], style={"color": "green", "marginRight": "10px"}),
-            html.Div(["Orange zone: within 10 minutes cycling"], style={"color": "orange", "marginRight": "10px"}),
+            html.Div(
+                ["ISOCHRONE LINES:"],
+                style={"fontWeight": "bold", "color": "black", "marginRight": "10px"},
+            ),
+            html.Div(
+                ["Green zone: within 5 minutes cycling"],
+                style={"color": "green", "marginRight": "10px"},
+            ),
+            html.Div(
+                ["Orange zone: within 10 minutes cycling"],
+                style={"color": "orange", "marginRight": "10px"},
+            ),
         ]
 
     if contour_type == "bike-iso20":
@@ -844,7 +926,7 @@ def contour_graph(contour_type, lon, lat, contour_color="black", fxn_verbose=0):
             profile_str="bike",
             minutes_str="5",
             hex_colors_str="00ff00",
-            mapbox_access_token=glb_mapbox_access_token
+            mapbox_access_token=glb_mapbox_access_token,
         )
         geojson_layers_list = a_layer
 
@@ -855,7 +937,7 @@ def contour_graph(contour_type, lon, lat, contour_color="black", fxn_verbose=0):
             profile_str="bike",
             minutes_str="10",
             hex_colors_str="ffa500",
-            mapbox_access_token=glb_mapbox_access_token
+            mapbox_access_token=glb_mapbox_access_token,
         )
         geojson_layers_list = geojson_layers_list + a_layer
 
@@ -866,16 +948,28 @@ def contour_graph(contour_type, lon, lat, contour_color="black", fxn_verbose=0):
             profile_str="bike",
             minutes_str="20",
             hex_colors_str="ff0000",
-            mapbox_access_token=glb_mapbox_access_token
+            mapbox_access_token=glb_mapbox_access_token,
         )
         geojson_layers_list = geojson_layers_list + a_layer
 
         # set isochrone legend text
         isochrone_legend = [
-            html.Div(["ISOCHRONE LINES:"], style={"fontWeight": "bold", "color": "black", "marginRight": "10px"}),
-            html.Div(["Green zone: within 5 minutes cycling"], style={"color": "green", "marginRight": "10px"}),
-            html.Div(["Orange zone: within 10 minutes cycling"], style={"color": "orange", "marginRight": "10px"}),
-            html.Div(["Red zone: within 20 minutes cycling"], style={"color": "red", "marginRight": "10px"}),
+            html.Div(
+                ["ISOCHRONE LINES:"],
+                style={"fontWeight": "bold", "color": "black", "marginRight": "10px"},
+            ),
+            html.Div(
+                ["Green zone: within 5 minutes cycling"],
+                style={"color": "green", "marginRight": "10px"},
+            ),
+            html.Div(
+                ["Orange zone: within 10 minutes cycling"],
+                style={"color": "orange", "marginRight": "10px"},
+            ),
+            html.Div(
+                ["Red zone: within 20 minutes cycling"],
+                style={"color": "red", "marginRight": "10px"},
+            ),
         ]
 
     if contour_type == "walk-iso10":
@@ -886,7 +980,7 @@ def contour_graph(contour_type, lon, lat, contour_color="black", fxn_verbose=0):
             profile_str="walk",
             minutes_str="5",
             hex_colors_str="00ff00",
-            mapbox_access_token=glb_mapbox_access_token
+            mapbox_access_token=glb_mapbox_access_token,
         )
         geojson_layers_list = a_layer
 
@@ -897,15 +991,24 @@ def contour_graph(contour_type, lon, lat, contour_color="black", fxn_verbose=0):
             profile_str="walk",
             minutes_str="10",
             hex_colors_str="ffa500",
-            mapbox_access_token=glb_mapbox_access_token
+            mapbox_access_token=glb_mapbox_access_token,
         )
         geojson_layers_list = geojson_layers_list + a_layer
 
         # set isochrone legend text
         isochrone_legend = [
-            html.Div(["ISOCHRONE LINES:"], style={"fontWeight": "bold", "color": "black", "marginRight": "10px"}),
-            html.Div(["Green zone: within 5 minutes walking"], style={"color": "green", "marginRight": "10px"}),
-            html.Div(["Orange zone: within 10 minutes walking"], style={"color": "orange", "marginRight": "10px"}),
+            html.Div(
+                ["ISOCHRONE LINES:"],
+                style={"fontWeight": "bold", "color": "black", "marginRight": "10px"},
+            ),
+            html.Div(
+                ["Green zone: within 5 minutes walking"],
+                style={"color": "green", "marginRight": "10px"},
+            ),
+            html.Div(
+                ["Orange zone: within 10 minutes walking"],
+                style={"color": "orange", "marginRight": "10px"},
+            ),
         ]
 
     return datatable_geojson, geojson_layers_list, isochrone_legend
@@ -918,7 +1021,7 @@ external_stylesheets = [
     # https://bootswatch.com/zephyr/
     dbc.themes.ZEPHYR,
     # For Bootstrap Icons...
-    dbc.icons.BOOTSTRAP
+    dbc.icons.BOOTSTRAP,
 ]
 
 app = Dash(
@@ -927,7 +1030,7 @@ app = Dash(
     external_stylesheets=external_stylesheets,
 )
 app.title = "Ipheion Demo Dashboard"
-app.config['update_title'] = '.. Renewing ..'
+app.config["update_title"] = ".. Renewing .."
 # ToDo html page title to location that is viewed
 # https://dash.plotly.com/external-resources -> Update the Document Title Dynamically Based on the URL or Tab
 
@@ -940,109 +1043,108 @@ if the_hostname not in ["LEGION-2020"]:
     server = app.server  # required for Heroku
 
 app.layout = html.Div(
-        [
-            # TOP ROW / HEADER ROW
-            # ====================
-            # https://dash-bootstrap-components.opensource.faculty.ai/docs/components/layout/
-            header.build_header(
-                title_str=strings.HEADER_TITLE,
-                subtitle_str=o_glb_selected_municipality_name,
-                version_str=app_version
-            ),
-
-            debug.build_header(
-                dbg_str="-* debug text here *-",  # start with empty debug text
-                hide_it=glb_hide_debug_text
-            ),
-
-            # CENTER ROW
-            # ==========
-            dbc.Row(
-                [
-
-                    # LEFT COLUMN
-                    # ============
-                    dbc.Col(
-                        [
-                            rows.MUNICIPALITY_NAME_SELECTION_ROW(
-                                "Select Municipality", municipality_names
-                            ),
-                            html.Br(),
-                            rows.SWITCH_AND_SELECTION_ROW(
-                                SelectionName=company_selection_text,
-                                SelectionText="Show Company locations",
-                                DropDownPlaceholderText="Select 1 or more enterprises",
-                                DropDownOptions=enterprise_options,
-                            ),
-                            html.Br(),
-                            rows.SWITCH_AND_SELECTION_ROW(
-                                SelectionName=municipality_type_selection_text,
-                                SelectionText="Show municipality types",
-                                DropDownPlaceholderText="Select 1 or more municipality types",
-                                DropDownOptions=municipality_options,
-                            ),
-                            html.Br(),
-                            rows.SWITCH_AND_SELECTION_ROW(
-                                SelectionName=netzknoten_selection_text,
-                                SelectionText="Show Netzknoten locations",
-                                DropDownPlaceholderText="Select 1 or more netzknoten",
-                                DropDownOptions=netzknoten_options,
-                            ),
-                            html.Br(),
-                            rows.SWITCH_AND_SELECTION_ROW(
-                                SelectionName=prediction_selection_text,
-                                SelectionText="Show Predicted locations",
-                                DropDownPlaceholderText="Select 1 or more predictions",
-                                DropDownOptions=prediction_options,
-                            ),
-                            html.Br(),
-                            rows.DATATABLE_RESULTS_ROW(
-                                datatable_radio_options,
-                                default_radio_item_selection,
-                                settings_table_columns(),
-                            ),
-                        ],
-                        width=6,
-                        # style={"height": "400px"},
-                    ),
-
-                    # RIGHT COLUMN
-                    # ============
-                    dbc.Col(
-                        [
-                            # Adding Loading animation before map is shown
-                            dcc.Loading(
-                                id="loading-map",
-                                type="default",
-                                children=[
-                                    rows.MAP_ROW(
-                                        "mapbox",
-                                        mapbox_modebar("company_overview"),
-                                        empty_map(glb_mapbox_access_token, glb_calc_center, glb_calc_zoom),
+    [
+        # TOP ROW / HEADER ROW
+        # ====================
+        # https://dash-bootstrap-components.opensource.faculty.ai/docs/components/layout/
+        header.build_header(
+            title_str=strings.HEADER_TITLE,
+            subtitle_str=o_glb_selected_municipality_name,
+            version_str=app_version,
+        ),
+        debug.build_header(
+            dbg_str="-* debug text here *-",  # start with empty debug text
+            hide_it=glb_hide_debug_text,
+        ),
+        # CENTER ROW
+        # ==========
+        dbc.Row(
+            [
+                # LEFT COLUMN
+                # ============
+                dbc.Col(
+                    [
+                        rows.MUNICIPALITY_NAME_SELECTION_ROW(
+                            "Select Municipality", municipality_names
+                        ),
+                        html.Br(),
+                        rows.SWITCH_AND_SELECTION_ROW(
+                            SelectionName=company_selection_text,
+                            SelectionText="Show Company locations",
+                            DropDownPlaceholderText="Select 1 or more enterprises",
+                            DropDownOptions=enterprise_options,
+                        ),
+                        html.Br(),
+                        rows.SWITCH_AND_SELECTION_ROW(
+                            SelectionName=municipality_type_selection_text,
+                            SelectionText="Show municipality types",
+                            DropDownPlaceholderText="Select 1 or more municipality types",
+                            DropDownOptions=municipality_options,
+                        ),
+                        html.Br(),
+                        rows.SWITCH_AND_SELECTION_ROW(
+                            SelectionName=netzknoten_selection_text,
+                            SelectionText="Show Netzknoten locations",
+                            DropDownPlaceholderText="Select 1 or more netzknoten",
+                            DropDownOptions=netzknoten_options,
+                        ),
+                        html.Br(),
+                        rows.SWITCH_AND_SELECTION_ROW(
+                            SelectionName=prediction_selection_text,
+                            SelectionText="Show Predicted locations",
+                            DropDownPlaceholderText="Select 1 or more predictions",
+                            DropDownOptions=prediction_options,
+                        ),
+                        html.Br(),
+                        rows.DATATABLE_RESULTS_ROW(
+                            RadioItemOptions=datatable_radio_options,
+                            RadioItemValue=default_radio_item_selection,
+                            TableColumnSettings=settings_table_columns(),
+                        ),
+                    ],
+                    width=6,
+                    # style={"height": "400px"},
+                ),
+                # RIGHT COLUMN
+                # ============
+                dbc.Col(
+                    [
+                        # Adding Loading animation before map is shown
+                        dcc.Loading(
+                            id="loading-map",
+                            type="default",
+                            children=[
+                                rows.MAP_ROW(
+                                    "mapbox",
+                                    mapbox_modebar("company_overview"),
+                                    empty_map(
+                                        glb_mapbox_access_token,
+                                        glb_calc_center,
+                                        glb_calc_zoom,
                                     ),
-                                ],
-                            ),
-                            html.Br(),
-                            rows.LEGEND_ROW(),
-                        ],
-                        width=6,
-                        # style={"height": "400px"},
-                    ),
-                ],
-                style={"paddingTop": "10px"},
-            ),
-
-            # BELOW THE MAP AND SELECTIONS
-            # ============================
-            html.Br(),
-            footer.build_footer(),
-        ],
-        id="data-screen",
-        # style={
-        #     "border-style": "solid",
-        #     "height": "98vh"
-        # }
-    )
+                                ),
+                            ],
+                        ),
+                        html.Br(),
+                        rows.LEGEND_ROW(),
+                    ],
+                    width=6,
+                    # style={"height": "400px"},
+                ),
+            ],
+            style={"paddingTop": "10px"},
+        ),
+        # BELOW THE MAP AND SELECTIONS
+        # ============================
+        html.Br(),
+        footer.build_footer(),
+    ],
+    id="data-screen",
+    # style={
+    #     "border-style": "solid",
+    #     "height": "98vh"
+    # }
+)
 
 
 ####################################################
@@ -1063,19 +1165,27 @@ app.layout = html.Div(
     Output("mapbox", "figure"),  # update the graph in mapbox section
     Output("the-datatable", "data"),  # details datatable
     Output("the-datatable-total", "data"),  # totals datatable
+    Output("div-datatable", "style"),
     Output("datatable-pre-text", "children"),  # text above datatable
-    Output("isochrone-legend-col", "children"),  # add or remove / update the isochrone legend
+    Output(
+        "isochrone-legend-col", "children"
+    ),  # add or remove / update the isochrone legend
     Output("header-subtitle", "children"),  # set value in the headers subtitle
-    Output("locate-municipality", "value"),  # set value in the Select Municipality dropdown box
-    Output("radio-item-selection", "value"),  # set value in the radio item of the data table
+    Output(
+        "locate-municipality", "value"
+    ),  # set value in the Select Municipality dropdown box
+    Output(
+        "radio-item-selection", "value"
+    ),  # set value in the radio item of the data table
     Output("debug_header-row-center-text", "children"),  # text to show in debug row
-
     # Changes in (one of) these fires this callback
     # =============================================
     Input(company_selection_text + "-switch", "on"),  # use value from switch
     Input(company_selection_text + "-selection", "value"),  # use value from dropdown
     Input(municipality_type_selection_text + "-switch", "on"),  # use value from switch
-    Input(municipality_type_selection_text + "-selection", "value"),  # use value from dropdown
+    Input(
+        municipality_type_selection_text + "-selection", "value"
+    ),  # use value from dropdown
     Input(netzknoten_selection_text + "-switch", "on"),  # use value from switch
     Input(netzknoten_selection_text + "-selection", "value"),  # use value from dropdown
     Input(prediction_selection_text + "-switch", "on"),  # use value from switch
@@ -1086,11 +1196,9 @@ app.layout = html.Div(
     Input("locate-municipality", "value"),
     Input("radio-item-selection", "value"),
     Input("isochrone-legend-col", "children"),  # current isochrone legend
-
     # Values passed without firing callback
     # =============================================
     State("mapbox", "figure"),
-
     # Remarks
     # =============================================
     # Input vars in function should start with i_
@@ -1122,7 +1230,7 @@ def update_overview(
 
     # map settings
     global glb_init_calc_zoom  # initial value of map zoom
-    global glb_calc_zoom  # current value of map zoom 
+    global glb_calc_zoom  # current value of map zoom
     global glb_init_calc_center  # initial value of map center
     global glb_calc_center  # current value of map center
 
@@ -1149,6 +1257,7 @@ def update_overview(
     # global polygon_color
 
     global glb_updated_tabledata
+    global glb_datatable_visibility
 
     global glb_verbose  # generic verbose setting
     global glb_fxn_verbose  # verbose for functions
@@ -1157,7 +1266,7 @@ def update_overview(
 
     if glb_fxn_verbose > 0:
         print("[INFO   ] Start function update_overview")
-        
+
     if glb_fxn_verbose > 1:
         print("== INPUT ====================")
         print("i_company_active            :", i_company_active)
@@ -1170,14 +1279,21 @@ def update_overview(
         print("i_prediction_list           :", i_prediction_list)
         print("i_graph_clickdata           :", i_graph_clickdata)
         print("i_graph_relayoutdata:       :", i_graph_relayoutdata)
-        print("i_selected_municipality_name:", '"' + str(i_selected_municipality_name) + '"')
+        print(
+            "i_selected_municipality_name:",
+            '"' + str(i_selected_municipality_name) + '"',
+        )
         print("i_radio_item_selection      :", i_radio_item_selection)
         print("i_updated_isochrone_legend  :", i_updated_isochrone_legend)
         print("== STATE ====================")
         # print("s_figure                    :", s_figure)
         print("== DONE =====================")
 
-    o_debug_text = "[DEBUG ] Callback Triggered by: " + json.dumps(dash.callback_context.triggered) + str(i_selected_municipality_name)
+    o_debug_text = (
+        "[DEBUG ] Callback Triggered by: "
+        + json.dumps(dash.callback_context.triggered)
+        + str(i_selected_municipality_name)
+    )
 
     # these output vars have to have a value, so we set it to the input value
     # and if needed change it further on
@@ -1220,15 +1336,21 @@ def update_overview(
     # the municipality name in the selection box has changed
     # ======================================================
     if "locate-municipality.value" in changed_id:
-        if i_selected_municipality_name is not None:  # a municipality name is selected from selection box
+        if (
+            i_selected_municipality_name is not None
+        ):  # a municipality name is selected from selection box
             if glb_fxn_verbose > 2:
                 print("[INFO   ] Municipality_selection is not None")
                 print("[INFO   ]", i_selected_municipality_name)
 
             glb_latest_municipality = i_selected_municipality_name
             # get lat and lon values for the municipality that was selected in the selection box
-            glb_latest_lon = df_municipality.loc[df_municipality["uniform_city_name"] == i_selected_municipality_name]["lon"].values[0]
-            glb_latest_lat = df_municipality.loc[df_municipality["uniform_city_name"] == i_selected_municipality_name]["lat"].values[0]
+            glb_latest_lon = df_municipality.loc[
+                df_municipality["uniform_city_name"] == i_selected_municipality_name
+            ]["lon"].values[0]
+            glb_latest_lat = df_municipality.loc[
+                df_municipality["uniform_city_name"] == i_selected_municipality_name
+            ]["lat"].values[0]
             if glb_fxn_verbose > 2:
                 print("[INFO   ] lon:", glb_latest_lon)
                 print("[INFO   ] lat:", glb_latest_lat)
@@ -1253,12 +1375,18 @@ def update_overview(
             ].copy()
 
             # create a contour based on the radiobutton selection
-            glb_datatable_geojson, glb_geojson_layers_list, o_updated_isochrone_legend = contour_graph(
+            (
+                glb_datatable_geojson,
+                glb_geojson_layers_list,
+                o_updated_isochrone_legend,
+            ) = contour_graph(
                 contour_type=i_radio_item_selection,
                 lon=glb_latest_lon,
                 lat=glb_latest_lat,
                 contour_color="black",
-                fxn_verbose=glb_fxn_verbose)
+                fxn_verbose=glb_fxn_verbose,
+            )
+            glb_datatable_visibility = "hidden" if i_radio_item_selection == "empty" else "visible"
 
         else:  # locate-municipality value deselected
             # reset map to initial status / reset view
@@ -1286,9 +1414,14 @@ def update_overview(
             # reset the radiobutton for data selection
             datatable_typ = "empty"
 
-            glb_datatable_geojson = {}  # reset the geojeson contour because no municipality selected
+            glb_datatable_geojson = (
+                {}
+            )  # reset the geojeson contour because no municipality selected
             glb_geojson_layers_list = []
             o_updated_isochrone_legend = []  # remove the isochrone legend
+
+            # do not show datatable frame
+            glb_datatable_visibility = "hidden"
 
     # Value in dropdown box with companies changed
     # ======================================================
@@ -1300,9 +1433,7 @@ def update_overview(
                 df_company["enterprise"].isin(i_enterprise_list)
             ].copy()
         else:
-            df_company_filtered = df_company[
-                df_company["enterprise"].isin([])
-            ].copy()
+            df_company_filtered = df_company[df_company["enterprise"].isin([])].copy()
 
     # Value in dropdown box with municipality types changed
     # ======================================================
@@ -1373,30 +1504,48 @@ def update_overview(
             print("radio-item-selection.value in changed_id")
         datatable_typ = i_radio_item_selection
 
-        # zoom in to point that was clicked
-        glb_calc_zoom = 10  # zoom in to that point
         if glb_fxn_verbose > 2:
             print(datatable_typ)
-        # zoom out a little bit
-        if datatable_typ in ["iso30", "iso20", "bbox20", "circle20"]:
+
+        glb_calc_zoom = 10  # zoom in to that point
+        # zoom a bit if needed
+        if datatable_typ in ["car-iso30", "car-iso20", "bbox20", "circle20"]:
             if glb_fxn_verbose > 2:
                 print("changing glb_calc_zoom")
             glb_calc_zoom = 9
+        elif datatable_typ in ["car-iso10", "bike-iso20", "bike-iso10"]:
+            if glb_fxn_verbose > 2:
+                print("changing glb_calc_zoom")
+            glb_calc_zoom = 11
+        elif datatable_typ in ["walk-iso10"]:
+            if glb_fxn_verbose > 2:
+                print("changing glb_calc_zoom")
+            glb_calc_zoom = 12
 
-        if i_selected_municipality_name is not None and i_selected_municipality_name != "":
+        if (
+            i_selected_municipality_name is not None
+            and i_selected_municipality_name != ""
+        ):
             # create a contour based on the radiobutton selection
-            glb_datatable_geojson, glb_geojson_layers_list, o_updated_isochrone_legend = contour_graph(
+            (
+                glb_datatable_geojson,
+                glb_geojson_layers_list,
+                o_updated_isochrone_legend,
+            ) = contour_graph(
                 contour_type=i_radio_item_selection,
-                lon=glb_latest_lon,   # I have to check if there is always a value
+                lon=glb_latest_lon,  # ToDo I have to check if there is always a value
                 lat=glb_latest_lat,
                 contour_color="black",
-                fxn_verbose=glb_fxn_verbose)
+                fxn_verbose=glb_fxn_verbose,
+            )
+            glb_datatable_visibility = "hidden" if i_radio_item_selection == "empty" else "visible"
+
         else:
             glb_calc_zoom = glb_init_calc_zoom
 
     # Clicked somewhere om the map
     # ======================================================
-    if 'mapbox.clickData' in changed_id:
+    if "mapbox.clickData" in changed_id:
         if glb_fxn_verbose > 2:
             print("mapbox.clickData in changed_id")
 
@@ -1405,10 +1554,20 @@ def update_overview(
 
         # zoom in to point that was clicked
         glb_calc_zoom = 10  # zoom in to that point
-        if datatable_typ in ["iso30", "iso20", "bbox20", "circle20"]:
-            if glb_verbose:
-                print("changing calc zoom")
+
+        # zoom a bit if needed
+        if datatable_typ in ["car-iso30", "car-iso20", "bbox20", "circle20"]:
+            if glb_fxn_verbose > 2:
+                print("changing glb_calc_zoom")
             glb_calc_zoom = 9
+        elif datatable_typ in ["car-iso10", "bike-iso20", "bike-iso10"]:
+            if glb_fxn_verbose > 2:
+                print("changing glb_calc_zoom")
+            glb_calc_zoom = 11
+        elif datatable_typ in ["walk-iso10"]:
+            if glb_fxn_verbose > 2:
+                print("changing glb_calc_zoom")
+            glb_calc_zoom = 12
 
         glb_calc_center = {  # and use that point as center of the map
             "lon": glb_latest_lon,
@@ -1440,14 +1599,20 @@ def update_overview(
             "Company",
             "_10Km_combined_prediction_df",
             "_20Km_combined_prediction_df",
-            "selected location"
+            "selected location",
         ]:
-            glb_datatable_geojson, glb_geojson_layers_list, o_updated_isochrone_legend = contour_graph(
+            (
+                glb_datatable_geojson,
+                glb_geojson_layers_list,
+                o_updated_isochrone_legend,
+            ) = contour_graph(
                 contour_type=i_radio_item_selection,
-                lon=glb_latest_lon,   # I have to check if there is always a value
+                lon=glb_latest_lon,  # I have to check if there is always a value
                 lat=glb_latest_lat,
                 contour_color="black",
-                fxn_verbose=glb_fxn_verbose)
+                fxn_verbose=glb_fxn_verbose,
+            )
+            glb_datatable_visibility = "hidden" if i_radio_item_selection == "empty" else "visible"
 
         # When point clicked is on Municipality Curves
         if curve_name in [
@@ -1491,7 +1656,7 @@ def update_overview(
         glb_datatable_geojson,
         datatable_mun,
         datatable_typ,
-        glb_fxn_verbose
+        glb_fxn_verbose,
     )
     glb_updated_tabledata = o_updated_tabledata.copy()
 
@@ -1500,7 +1665,9 @@ def update_overview(
         print("UPDATED_GEO_FIG")
 
     if o_glb_selected_municipality_name != "":
-        o_datatable_pre_text = "Showing data in table below for " + o_glb_selected_municipality_name
+        o_datatable_pre_text = (
+            "Showing data in table below for " + o_glb_selected_municipality_name
+        )
     else:
         o_datatable_pre_text = "Show data for selected municipality in table"
 
@@ -1508,16 +1675,17 @@ def update_overview(
         update_overall_map(
             the_zoom=glb_calc_zoom,
             the_center=glb_calc_center,
-            fxn_verbose=glb_fxn_verbose
+            fxn_verbose=glb_fxn_verbose,
         ),
         o_updated_tabledata.to_dict("records"),
         o_updated_tabledata_total.to_dict("records"),
+        {"visibility": glb_datatable_visibility},
         o_datatable_pre_text,
         o_updated_isochrone_legend,
         o_glb_selected_municipality_name,
         o_glb_selected_municipality_name,
         o_radio_item_selection,
-        o_debug_text
+        o_debug_text,
     )
 
 
@@ -1527,14 +1695,14 @@ def update_overview(
 @app.callback(
     # Where the results of the function end up
     # =======================================
-    Output(company_selection_text + "-selection", "disabled"),  # enable/disable dropdownbox functionality
+    Output(
+        company_selection_text + "-selection", "disabled"
+    ),  # enable/disable dropdownbox functionality
     Output("company-legend-col", "children"),
-
     # Changes in (one of) these fires this callback
     # =============================================
     Input(company_selection_text + "-switch", "on"),  # use value from switch
     Input(company_selection_text + "-selection", "value")
-
     # Remarks
     # =============================================
     # Input vars in function should start with i_
@@ -1543,10 +1711,10 @@ def update_overview(
     #
 )
 def status_company_selection(
-        # Input()
-        i_switch_val,
-        i_selection_val
-        # State()
+    # Input()
+    i_switch_val,
+    i_selection_val
+    # State()
 ):
     if not i_switch_val:  # disabled the selection options trough switch
         o_switch_set = True
@@ -1557,7 +1725,10 @@ def status_company_selection(
         o_legend_text = []
     else:  # some selections made
         o_legend_text = [
-            html.Div(["COMMERCIAL POINTS:"], style={"fontWeight": "bold", "color": "black", "marginRight": "10px"}),
+            html.Div(
+                ["COMMERCIAL POINTS:"],
+                style={"fontWeight": "bold", "color": "black", "marginRight": "10px"},
+            ),
             html.Div(["Mc Donalds"], style={"color": "red", "marginRight": "10px"}),
             html.Div(["Burger King"], style={"color": "blue", "marginRight": "10px"}),
             html.Div(["KFC"], style={"color": "green", "marginRight": "10px"}),
@@ -1573,14 +1744,14 @@ def status_company_selection(
 @app.callback(
     # Where the results of the function end up
     # =======================================
-    Output(municipality_type_selection_text + "-selection", "disabled"),  # enable/disable dropdownbox functionality
+    Output(
+        municipality_type_selection_text + "-selection", "disabled"
+    ),  # enable/disable dropdownbox functionality
     Output("municipality-legend-col", "children"),
-
     # Changes in (one of) these fires this callback
     # =============================================
     Input(municipality_type_selection_text + "-switch", "on"),  # use value from switch
     Input(municipality_type_selection_text + "-selection", "value")
-
     # Remarks
     # =============================================
     # Input vars in function should start with i_
@@ -1589,10 +1760,10 @@ def status_company_selection(
     #
 )
 def status_municipality_selection(
-        # Input()
-        i_switch_val,
-        i_selection_val
-        # State()
+    # Input()
+    i_switch_val,
+    i_selection_val
+    # State()
 ):
     if not i_switch_val:  # disabled the selection options trough switch
         o_switch_set = True
@@ -1603,9 +1774,14 @@ def status_municipality_selection(
         o_legend_text = []
     else:  # some selections made
         o_legend_text = [
-            html.Div(["MUNICIPALITY POINTS:"], style={"fontWeight": "bold", "color": "black", "marginRight": "10px"}),
+            html.Div(
+                ["MUNICIPALITY POINTS:"],
+                style={"fontWeight": "bold", "color": "black", "marginRight": "10px"},
+            ),
             html.Div(["Gemeinde"], style={"color": "black", "marginRight": "10px"}),
-            html.Div(["Kreissitz gemeinde"], style={"color": "purple", "marginRight": "10px"}),
+            html.Div(
+                ["Kreissitz gemeinde"], style={"color": "purple", "marginRight": "10px"}
+            ),
         ]
 
     return o_switch_set, o_legend_text
@@ -1617,12 +1793,12 @@ def status_municipality_selection(
 @app.callback(
     # Where the results of the function end up
     # =======================================
-    Output(netzknoten_selection_text + "-selection", "disabled"),  # enable/disable dropdownbox functionality
-
+    Output(
+        netzknoten_selection_text + "-selection", "disabled"
+    ),  # enable/disable dropdownbox functionality
     # Changes in (one of) these fires this callback
     # =============================================
     Input(netzknoten_selection_text + "-switch", "on"),  # use value from switch
-
     # Remarks
     # =============================================
     # Input vars in function should start with i_
@@ -1631,9 +1807,9 @@ def status_municipality_selection(
     #
 )
 def status_netzknoten_selection(
-        # Input()
-        i_switch_val
-        # State()
+    # Input()
+    i_switch_val,
+    # State()
 ):
     if not i_switch_val:  # disabled the selection options trough switch
         o_switch_set = True
@@ -1649,14 +1825,14 @@ def status_netzknoten_selection(
 @app.callback(
     # Where the results of the function end up
     # =======================================
-    Output("prediction-selection", "disabled"),  # enable/disable dropdownbox functionality
+    Output(
+        "prediction-selection", "disabled"
+    ),  # enable/disable dropdownbox functionality
     Output("prediction-legend-col", "children"),
-
     # Changes in (one of) these fires this callback
     # =============================================
     Input("prediction-switch", "on"),  # use value from switch
     Input("prediction-selection", "value")
-
     # Remarks
     # =============================================
     # Input vars in function should start with i_
@@ -1665,10 +1841,10 @@ def status_netzknoten_selection(
     #
 )
 def status_prediction_selection(
-        # Input()
-        i_switch_val,
-        i_selection_val
-        # State()
+    # Input()
+    i_switch_val,
+    i_selection_val
+    # State()
 ):
     if not i_switch_val:  # disabled the selection options trough switch
         o_switch_set = True
@@ -1679,9 +1855,16 @@ def status_prediction_selection(
         o_legend_text = []
     else:  # some selections made
         o_legend_text = [
-            html.Div(["PREDICTION POINTS:"], style={"fontWeight": "bold", "color": "black", "marginRight": "10px"}),
-            html.Div(["10 Km / Min Zone"], style={"color": "cyan", "marginRight": "10px"}),
-            html.Div(["20 Km / Min Zone"], style={"color": "fuchsia", "marginRight": "10px"}),
+            html.Div(
+                ["PREDICTION POINTS:"],
+                style={"fontWeight": "bold", "color": "black", "marginRight": "10px"},
+            ),
+            html.Div(
+                ["10 Km / Min Zone"], style={"color": "cyan", "marginRight": "10px"}
+            ),
+            html.Div(
+                ["20 Km / Min Zone"], style={"color": "fuchsia", "marginRight": "10px"}
+            ),
         ]
 
     return o_switch_set, o_legend_text
@@ -1698,16 +1881,24 @@ if __name__ == "__main__":
 
     # Raspberry Pi on Local network
     if the_hostname == "rpi4-18 ":
-        app.run_server(host="192.168.2.18", port=8050, debug=True, use_reloader=False)  # Turn off reloader if inside Jupyter
+        app.run_server(
+            host="192.168.2.18", port=8050, debug=True, use_reloader=False
+        )  # Turn off reloader if inside Jupyter
 
     # EC2 instance on AWS
     elif the_hostname == "ip-10-0-1-5":
-        app.run_server(host="10.0.1.5", port=8050, debug=True, use_reloader=False)  # Turn off reloader if inside Jupyter
+        app.run_server(
+            host="10.0.1.5", port=8050, debug=True, use_reloader=False
+        )  # Turn off reloader if inside Jupyter
 
     # local development machine
     elif the_hostname == "LEGION-2020":
-        app.run_server(debug=True, use_reloader=False)  # Turn off reloader if inside Jupyter
+        app.run_server(
+            debug=True, use_reloader=False
+        )  # Turn off reloader if inside Jupyter
 
     # on Heroku
     else:
-        app.run_server(debug=True, use_reloader=False)  # Turn off reloader if inside Jupyter
+        app.run_server(
+            debug=True, use_reloader=False
+        )  # Turn off reloader if inside Jupyter

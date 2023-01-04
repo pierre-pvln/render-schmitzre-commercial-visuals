@@ -2,11 +2,12 @@
 #
 # GEEN FUNCTIES/LOGICA UITVOEREN IN DIT BESTAND.
 # ENKEL BEDOELD OM EEN LAYOUT ELEMENT TE DEFINIEREN
+# AANPASSINGEN VIA CALLBACK OUTPUTS
 #
-# @version    v0.0.5  2022-11-17
+# @version    v0.0.6  2023-01-04
 # @author     pierre@ipheion.eu
 # @copyright  (C) 2020-2022 Pierre Veelen
-# 
+#
 # ############################################################################
 #
 # - styling in .\assets\styles.css
@@ -20,10 +21,8 @@
 import dash_bootstrap_components as dbc
 # Visualization modules
 import dash_daq as daq
-# import dash_table
-# import dash_core_components as dcc
-# import dash_html_components as html
 from dash import dash_table, dcc, html
+
 
 def MAP_ROW(id_name, settings, a_figure):
     return dbc.Row(
@@ -43,7 +42,7 @@ def MAP_ROW(id_name, settings, a_figure):
 def MUNICIPALITY_NAME_SELECTION_ROW(SelectionText, DropDownOptions):
     return dbc.Row(  # Municipality
         [
-            dbc.Col([html.P([SelectionText,],),], width=3),
+            dbc.Col([html.P([SelectionText],)], width=3),
             dbc.Col(
                 [
                     # https://dash.plotly.com/dash-core-components/dropdown
@@ -64,122 +63,6 @@ def MUNICIPALITY_NAME_SELECTION_ROW(SelectionText, DropDownOptions):
     )
 
 
-# def MUNICIPALITY_TYPE_SELECTION_ROW(
-#     SelectionName, SelectionText, DropDownPlaceholderText, DropDownOptions
-# ):
-#     return dbc.Row(  # Municipality types
-#         [
-#             dbc.Col(
-#                 [
-#                     html.P([SelectionText,],),
-#                     daq.BooleanSwitch(id=SelectionName + "-switch", on=True,),
-#                 ],
-#                 id=SelectionName + "-switch-column",
-#                 # style={"border-style": "solid"},
-#                 width=3,
-#             ),
-#             dbc.Col(
-#                 # create a dropdown selection for the enterprises
-#                 [
-#                     html.P(["Options",],),
-#                     # https://dash.plotly.com/dash-core-components/dropdown
-#                     dcc.Dropdown(
-#                         id=SelectionName + "-selection",
-#                         options=DropDownOptions,
-#                         value=[],  # start with empty selection
-#                         # value=all_enterprise_values,  # start with all values in selectionbox
-#                         placeholder=DropDownPlaceholderText,
-#                         searchable=True,
-#                         multi=True,
-#                         disabled=False,
-#                     ),
-#                 ],
-#                 width=9,
-#                 id=SelectionName + "-dropdown-column",
-#                 # style={"border-style": "solid"}
-#             ),
-#         ],
-#     )
-
-
-# def COMPANY_SELECTION_ROW(
-#     SelectionName, SelectionText, DropDownPlaceholderText, DropDownOptions
-# ):
-#     return dbc.Row(  # Company
-#         [
-#             dbc.Col(
-#                 [
-#                     html.P([SelectionText,],),
-#                     daq.BooleanSwitch(id=SelectionName + "-switch", on=True,),
-#                 ],
-#                 id=SelectionName + "-switch-column",
-#                 # style={"border-style": "solid"},
-#                 width=3,
-#             ),
-#             dbc.Col(
-#                 # create a dropdown selection for the enterprises
-#                 [
-#                     html.P(["Options",],),
-#                     # https://dash.plotly.com/dash-core-components/dropdown
-#                     dcc.Dropdown(
-#                         id=SelectionName + "-selection",
-#                         options=DropDownOptions,
-#                         # value=enterprise_options[0]['value'],  # start with one value is selectionbox
-#                         value=[],  # start with empty selection
-#                         # value=all_enterprise_values,  # start with all values in selectionbox
-#                         placeholder=DropDownPlaceholderText,
-#                         searchable=True,
-#                         multi=True,
-#                         disabled=False,
-#                     ),
-#                 ],
-#                 id=SelectionName + "-dropdown-column",
-#                 width=9,
-#                 # style={"border-style": "solid"}
-#             ),
-#         ],
-#     )
-
-
-# def NETZKNOTEN_SELECTION_ROW(
-#     SelectionName, SelectionText, DropDownPlaceholderText, DropDownOptions
-# ):
-#     return dbc.Row(  # Netzknoten
-#         [
-#             dbc.Col(
-#                 [
-#                     html.P([SelectionText,],),
-#                     daq.BooleanSwitch(id=SelectionName + "-switch", on=True,),
-#                 ],
-#                 id=SelectionName + "-switch-column",
-#                 # style={"border-style": "solid"},
-#                 width=3,
-#             ),
-#             dbc.Col(
-#                 # create a dropdown selection for the netzknoten
-#                 [
-#                     html.P(["Options",],),
-#                     # https://dash.plotly.com/dash-core-components/dropdown
-#                     dcc.Dropdown(
-#                         id=SelectionName + "-selection",
-#                         options=DropDownOptions,
-#                         # value=enterprise_options[0]['value'],  # start with one value is selectionbox
-#                         value=[],  # start with empty selection
-#                         # value=all_enterprise_values,  # start with all values in selectionbox
-#                         placeholder=DropDownPlaceholderText,
-#                         searchable=True,
-#                         multi=True,
-#                         disabled=False,
-#                     ),
-#                 ],
-#                 id=SelectionName + "-dropdown-column",
-#                 width=9,
-#                 # style={"borderStyle": "solid"}
-#             ),
-#         ],
-#     )
-
-
 def SWITCH_AND_SELECTION_ROW(
     SelectionName, SelectionText, DropDownPlaceholderText, DropDownOptions
 ):
@@ -187,7 +70,7 @@ def SWITCH_AND_SELECTION_ROW(
         [
             dbc.Col(
                 [
-                    html.P([SelectionText,],),
+                    html.P([SelectionText],),
                     daq.BooleanSwitch(id=SelectionName + "-switch", on=True,),
                 ],
                 id=SelectionName + "-switch-column",
@@ -197,7 +80,7 @@ def SWITCH_AND_SELECTION_ROW(
             dbc.Col(
                 # create a dropdown selection for the netzknoten
                 [
-                    html.P(["Options",],),
+                    html.P(["Options"],),
                     # https://dash.plotly.com/dash-core-components/dropdown
                     dcc.Dropdown(
                         id=SelectionName + "-selection",
@@ -219,47 +102,9 @@ def SWITCH_AND_SELECTION_ROW(
     )
 
 
-# def PREDICTION_SELECTION_ROW(
-#     SelectionName, SelectionText, DropDownPlaceholderText, DropDownOptions
-# ):
-#     return dbc.Row(  # Prediction
-#         [
-#             dbc.Col(
-#                 [
-#                     html.P([SelectionText, ],),
-#                     daq.BooleanSwitch(id=SelectionName + "-switch", on=True,),
-#                 ],
-#                 id=SelectionName + "-switch-column",
-#                 # style={"borderStyle": "solid"},
-#                 width=3,
-#             ),
-#             dbc.Col(
-#                 # create a dropdown selection for the netzknoten
-#                 [
-#                     html.P(["Options",],),
-#                     # https://dash.plotly.com/dash-core-components/dropdown
-#                     dcc.Dropdown(
-#                         id=SelectionName + "-selection",
-#                         options=DropDownOptions,
-#                         # value=enterprise_options[0]['value'],  # start with one value is selectionbox
-#                         value=[],  # start with empty selection
-#                         # value=all_enterprise_values,  # start with all values in selectionbox
-#                         placeholder=DropDownPlaceholderText,
-#                         searchable=True,
-#                         multi=True,
-#                         disabled=False,
-#                     ),
-#                 ],
-#                 id=SelectionName + "-dropdown-column",
-#                 width=9,
-#                 # style={"borderStyle": "solid"}
-#             ),
-#         ],
-#     )
-
-
 def DATATABLE_RESULTS_ROW(RadioItemOptions, RadioItemValue, TableColumnSettings):
-    return dbc.Row(  # data overzicht
+
+    return dbc.Row(  # datatabel overzicht
         [
             dbc.Col(
                 [
@@ -268,7 +113,7 @@ def DATATABLE_RESULTS_ROW(RadioItemOptions, RadioItemValue, TableColumnSettings)
                             html.P(
                                 ["Show data based on which selection criterium:"],
                                 id="datatable-pre-text",
-                                style={"marginLeft": "-20px",},
+                                style={"marginLeft": "-20px"},
                             ),
                             dcc.RadioItems(
                                 options=RadioItemOptions,
@@ -294,16 +139,40 @@ def DATATABLE_RESULTS_ROW(RadioItemOptions, RadioItemValue, TableColumnSettings)
                                 columns=TableColumnSettings,
                                 # data=datatable_df.to_dict('records'),
                                 page_size=2,  # max number of rows per "page" in this case only header and total row
-                                style_table={"overflowY": "auto"},  #'height': '300px',
+                                style_table={"overflowY": "auto"},  # 'height': '300px',
                                 # keep heading on 1 line, wrap the data
                                 style_data={"whiteSpace": "normal", "height": "auto"},
                                 style_cell_conditional=[
-                                    {"if": {"column_id": "uniform_city_name"}, "width": "200px", "fontSize": "12px"},
-                                    {"if": {"column_id": "insgesamt"}, "width": "30px", "fontSize": "12px"},
-                                    {"if": {"column_id": "count_BK"}, "width": "25px", "fontSize": "12px"},
-                                    {"if": {"column_id": "count_McD"}, "width": "25px", "fontSize": "12px"},
-                                    {"if": {"column_id": "count_KFC"}, "width": "25px", "fontSize": "12px"},
-                                    {"if": {"column_id": "count_MFT"}, "width": "25px", "fontSize": "12px"},
+                                    {
+                                        "if": {"column_id": "uniform_city_name"},
+                                        "width": "200px",
+                                        "fontSize": "12px",
+                                    },
+                                    {
+                                        "if": {"column_id": "insgesamt"},
+                                        "width": "30px",
+                                        "fontSize": "12px",
+                                    },
+                                    {
+                                        "if": {"column_id": "count_BK"},
+                                        "width": "25px",
+                                        "fontSize": "12px",
+                                    },
+                                    {
+                                        "if": {"column_id": "count_McD"},
+                                        "width": "25px",
+                                        "fontSize": "12px",
+                                    },
+                                    {
+                                        "if": {"column_id": "count_KFC"},
+                                        "width": "25px",
+                                        "fontSize": "12px",
+                                    },
+                                    {
+                                        "if": {"column_id": "count_MFT"},
+                                        "width": "25px",
+                                        "fontSize": "12px",
+                                    },
                                 ],
                             ),
                             html.Br([],),
@@ -312,20 +181,50 @@ def DATATABLE_RESULTS_ROW(RadioItemOptions, RadioItemValue, TableColumnSettings)
                                 columns=TableColumnSettings,
                                 # data=datatable_df.to_dict('records'),
                                 page_size=6,  # max number of rows per "page"
-                                style_table={"overflowY": "auto"},  #'height': '300px',
+                                style_table={"overflowY": "auto"},  # 'height': '300px',
                                 # keep heading on 1 line, wrap the data
-                                style_data={"whiteSpace": "normal", "height": "auto",},
+                                style_data={"whiteSpace": "normal", "height": "auto"},
                                 style_cell_conditional=[
-                                    {"if": {"column_id": "uniform_city_name"}, "width": "200px", "fontSize": "12px"},
-                                    {"if": {"column_id": "insgesamt"}, "width": "30px", "fontSize": "12px"},
-                                    {"if": {"column_id": "count_BK"}, "width": "25px", "fontSize": "12px"},
-                                    {"if": {"column_id": "count_McD"}, "width": "25px", "fontSize": "12px"},
-                                    {"if": {"column_id": "count_KFC"}, "width": "25px", "fontSize": "12px"},
-                                    {"if": {"column_id": "count_MFT"}, "width": "25px", "fontSize": "12px"},
+                                    {
+                                        "if": {"column_id": "uniform_city_name"},
+                                        "width": "200px",
+                                        "fontSize": "12px",
+                                    },
+                                    {
+                                        "if": {"column_id": "insgesamt"},
+                                        "width": "30px",
+                                        "fontSize": "12px",
+                                    },
+                                    {
+                                        "if": {"column_id": "count_BK"},
+                                        "width": "25px",
+                                        "fontSize": "12px",
+                                    },
+                                    {
+                                        "if": {"column_id": "count_McD"},
+                                        "width": "25px",
+                                        "fontSize": "12px",
+                                    },
+                                    {
+                                        "if": {"column_id": "count_KFC"},
+                                        "width": "25px",
+                                        "fontSize": "12px",
+                                    },
+                                    {
+                                        "if": {"column_id": "count_MFT"},
+                                        "width": "25px",
+                                        "fontSize": "12px",
+                                    },
                                 ],
                             ),
                             html.Br([],),
                         ],
+                        # styling used to show / not show the table
+                        style={
+                            # "borderStyle": "solid",
+                            # "borderWidth": "1px",
+                            "visibility": "hidden"
+                        },
                         id="div-datatable",
                     ),
                 ],

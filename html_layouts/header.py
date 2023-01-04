@@ -6,7 +6,7 @@
 # @version    v0.0.5  2022-11-17
 # @author     pierre@ipheion.eu
 # @copyright  (C) 2020-2022 Pierre Veelen
-# 
+#
 # ############################################################################
 #
 # - styling in .\assets\styles.css
@@ -38,10 +38,7 @@ def build_header(title_str, subtitle_str, version_str):
 
 
 def header_row_top():
-    return dbc.Row(
-        children=[],
-        id="header-row-top"
-    )
+    return dbc.Row(children=[], id="header-row-top")
 
 
 def header_row_center(header_title="", header_subtitle="", current_version=""):
@@ -53,7 +50,6 @@ def header_row_center(header_title="", header_subtitle="", current_version=""):
                         html.Img(
                             [],
                             src="./assets/img/ipheion/Slide5_grid_transparent.png",
-
                             height=60,
                             style={  # "textAlign": "center"
                                 "display": "block",
@@ -83,12 +79,7 @@ def header_row_center(header_title="", header_subtitle="", current_version=""):
                 width=6,
             ),
             dbc.Col(
-                [
-                    html.P(
-                        ["version: " + current_version],
-                        style={"color": "#263473"},
-                    )
-                ]
+                [html.P(["version: " + current_version], style={"color": "#263473"},)]
             ),
             dbc.Col(
                 [

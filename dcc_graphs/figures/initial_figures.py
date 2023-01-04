@@ -7,7 +7,7 @@ def empty_map(token, center_value, zoom_value):
             showlegend=False,  # do not show this dataset in legend
         )
     ]
-    
+
     return {
         "data": initial_data_dict_list,
         "layout": dict(

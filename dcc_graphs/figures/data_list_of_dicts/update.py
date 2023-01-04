@@ -1,6 +1,6 @@
 def point_on_map_data_dict_list(inputdf, subset_name, fxn_verbose=0):
     if fxn_verbose > 0:
-        print("[FUNCTION] point_on_map_data_dict_list")
+        print("\n[FUNCTION] point_on_map_data_dict_list")
     if fxn_verbose > 1:
         print("len inputdf    :", len(inputdf))
         print("columns inputdf:", inputdf.columns)
@@ -39,15 +39,16 @@ def point_on_map_data_dict_list(inputdf, subset_name, fxn_verbose=0):
             symbol="circle",  # name of icon in icon set or "circle"
             size=15,
             color="darkred",
-            #line=dict(width=6, color="green"),
+            # line=dict(width=6, color="green"),
             opacity=1,  # show marker
         ),
     )
     return [point_on_map]
 
+
 def municipality_data_dict_list(inputdf, subset_name, fxn_verbose=0):
     if fxn_verbose > 0:
-        print("[FUNCTION] point_on_map_data_dict_list")
+        print("\n[FUNCTION] point_on_map_data_dict_list")
     if fxn_verbose > 1:
         print("len inputdf    :", len(inputdf))
         print("columns inputdf:", inputdf.columns)
@@ -132,7 +133,7 @@ def municipality_data_dict_list(inputdf, subset_name, fxn_verbose=0):
 
 def company_data_dict_list(inputdf, subset_name, fxn_verbose=0):
     if fxn_verbose > 0:
-        print("[FUNCTION] point_on_map_data_dict_list")
+        print("\n[FUNCTION] company_data_dict_list")
     if fxn_verbose > 1:
         print("len inputdf    :", len(inputdf))
         print("columns inputdf:", inputdf.columns)
@@ -192,7 +193,7 @@ def company_data_dict_list(inputdf, subset_name, fxn_verbose=0):
 
 def netzknoten_data_dict_list(inputdf, subset_name, fxn_verbose=0):
     if fxn_verbose > 0:
-        print("[FUNCTION] point_on_map_data_dict_list")
+        print("\n[FUNCTION] netzknoten_data_dict_list")
     if fxn_verbose > 1:
         print("len inputdf    :", len(inputdf))
         print("columns inputdf:", inputdf.columns)
@@ -239,7 +240,7 @@ def netzknoten_data_dict_list(inputdf, subset_name, fxn_verbose=0):
 
 def prediction_10km_data_dict_list(inputdf, subset_name, fxn_verbose=0):
     if fxn_verbose > 0:
-        print("[FUNCTION] point_on_map_data_dict_list")
+        print("\n[FUNCTION] prediction_10km_data_dict_list")
     if fxn_verbose > 1:
         print("len inputdf    :", len(inputdf))
         print("columns inputdf:", inputdf.columns)
@@ -290,7 +291,7 @@ def prediction_10km_data_dict_list(inputdf, subset_name, fxn_verbose=0):
 
 def prediction_20km_data_dict_list(inputdf, subset_name, fxn_verbose=0):
     if fxn_verbose > 0:
-        print("[FUNCTION] point_on_map_data_dict_list")
+        print("\n[FUNCTION] prediction_20km_data_dict_list")
     if fxn_verbose > 1:
         print("len inputdf    :", len(inputdf))
         print("columns inputdf:", inputdf.columns)
@@ -341,7 +342,7 @@ def prediction_20km_data_dict_list(inputdf, subset_name, fxn_verbose=0):
 
 def selected_municipality_data_dict_list(inputdf, subset_name, fxn_verbose=0):
     if fxn_verbose > 0:
-        print("[FUNCTION] point_on_map_data_dict_list")
+        print("\n[FUNCTION] selected_municipality_data_dict_list")
     if fxn_verbose > 1:
         print("len inputdf    :", len(inputdf))
         print("columns inputdf:", inputdf.columns)

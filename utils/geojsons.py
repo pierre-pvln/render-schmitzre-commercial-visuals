@@ -1,15 +1,16 @@
 # basic modules
 import json
 
+import certifi
 # https modules
 import urllib3
-import certifi
-
 # data wrangling modules
-from numpy import linspace, cos, sin, pi
+from numpy import cos, linspace, pi, sin
 
 
-def boundingbox_and_geojson(center_lon, center_lat, r=0.1, bboxcolor="purple", verbose=False):
+def boundingbox_and_geojson(
+    center_lon, center_lat, r=0.1, bboxcolor="purple", verbose=False
+):
     """
     lon:       lon of center of bbox
     lat:       lat of center of bbox
@@ -76,7 +77,7 @@ def circle_and_geojson(center_lon, center_lat, r=0.1, color="red", verbose=False
     }
 
     if verbose:
-        print('geojson_dict')
+        print("geojson_dict")
         print(geojson)
 
     circle_layer_dict = dict(
@@ -96,7 +97,14 @@ def circle_and_geojson(center_lon, center_lat, r=0.1, color="red", verbose=False
 
 
 def isochrone_and_geojson(
-    lon_point, lat_point, polygontype_str, profile_str, minutes_str, hex_colors_str, mapbox_access_token, verbose=False
+    lon_point,
+    lat_point,
+    polygontype_str,
+    profile_str,
+    minutes_str,
+    hex_colors_str,
+    mapbox_access_token,
+    verbose=False,
 ):
     # https://api.mapbox.com/isochrone/v1/mapbox/driving/-118.22258,33.99038?contours_minutes=5,10,15&contours_colors=6706ce,04e813,4286f4&polygons=true&access_token=pk.eyJ1IjoicGllcnJldmVlbGVuIiwiYSI6ImNra3V6Z2JhNTFjeXUycHBjdWVkOXUxdDMifQ.tzOHbTKha9Co8-s_AarPJg
     if polygontype_str == "fill":
@@ -110,10 +118,10 @@ def isochrone_and_geojson(
     elif profile_str == "bike":
         profile = "cycling"
     elif profile_str == "walk":
-        profile = "walking" 
+        profile = "walking"
     else:
-        profile="driving"
-        
+        profile = "driving"
+
     url = (
         "https://api.mapbox.com/isochrone/v1/mapbox/"
         + profile
@@ -153,7 +161,7 @@ def isochrone_and_geojson(
         print(response.geturl())
         print("header")
         print(response.getheaders())
-        print('get_redirect_location')
+        print("get_redirect_location")
         print(response.get_redirect_location())
         print(json.loads(response.data.decode()))
 
@@ -168,7 +176,7 @@ def isochrone_and_geojson(
     featurecount = 0
 
     if verbose:
-        print(len(features_dict['features']))
+        print(len(features_dict["features"]))
     for feature in features_dict["features"]:
         geojson = {
             "type": "Feature",

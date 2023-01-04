@@ -1,4 +1,4 @@
-from numpy import interp, array
+from numpy import array, interp
 
 
 # simplified version of

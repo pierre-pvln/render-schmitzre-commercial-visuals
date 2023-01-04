@@ -6,7 +6,7 @@
 # @version    v0.0.5  2022-11-17
 # @author     pierre@ipheion.eu
 # @copyright  (C) 2020-2022 Pierre Veelen
-# 
+#
 # ############################################################################
 #
 # - styling in .\assets\styles.css
@@ -50,25 +50,18 @@ def footer_row_center():
                 target="_blank",
                 className="footer-container",
                 children=[
-                    html.H4(
-                        children=["Powered by"],
-                        className="footer-element",
-                    ),
-
+                    html.H4(children=["Powered by"], className="footer-element",),
                     html.Img(
                         # src="assets/img/ipheion/ipheion-logo-2022-64x64.svg",
                         src="./assets/img/ipheion/ipheion-logo-2022-darkest-with_grid-1024x1024.png",
                         id="ipheion-icon",
                         className="footer-element",
-                        style={
-                            'height': '2em',
-                            'display': 'inline-block'
-                        }
+                        style={"height": "2em", "display": "inline-block"},
                     ),
-
-                    html.H4(children=["Ipheion Data Visualisations"],
-                            className="footer-element"),
-
+                    html.H4(
+                        children=["Ipheion Data Visualisations"],
+                        className="footer-element",
+                    ),
                     # html.Img(
                     #     src="assets/ipheion_logo_2020.png",
                     #     id="ipheion-text",

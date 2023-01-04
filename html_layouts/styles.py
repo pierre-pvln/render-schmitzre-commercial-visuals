@@ -6,7 +6,7 @@
 # @version    v0.0.5  2022-11-20
 # @author     pierre@ipheion.eu
 # @copyright  (C) 2020-2022 Pierre Veelen
-# 
+#
 # ############################################################################
 #
 # - styling in .\assets\styles.css

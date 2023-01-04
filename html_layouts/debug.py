@@ -6,7 +6,7 @@
 # @version    v0.0.2  2022-12-02
 # @author     pierre@ipheion.eu
 # @copyright  (C) 2020-2022 Pierre Veelen
-# 
+#
 # ############################################################################
 #
 # - styling in .\assets\styles.css
@@ -29,28 +29,19 @@ def build_header(dbg_str, hide_it=True):
     :return: HTML Header
     """
     return html.Header(
-        children=[
-            header_row_top(),
-            header_row_center(dbg_str),
-            header_row_bottom(),
-        ],
-        hidden=hide_it
+        children=[header_row_top(), header_row_center(dbg_str), header_row_bottom()],
+        hidden=hide_it,
     )
 
 
 def header_row_top():
-    return dbc.Row(
-        children=[],
-        id="dbg_header-row-top"
-    )
+    return dbc.Row(children=[], id="dbg_header-row-top")
 
 
 def header_row_center(debug_text):
     return dbc.Row(
         children=[
-            dbc.Col(
-                []
-            ),
+            dbc.Col([]),
             dbc.Col(
                 [
                     html.P(
@@ -61,10 +52,7 @@ def header_row_center(debug_text):
                 ],
                 width=8,
             ),
-            dbc.Col(
-                [
-                ]
-            ),
+            dbc.Col([]),
         ],
         id="debug_header-row-center",
         style={
