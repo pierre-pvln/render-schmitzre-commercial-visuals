@@ -24,7 +24,9 @@ dash-daq==0.5.0
 # basic authentication
 #dash-auth==1.4.1
 # is work in progress. Using local dash_auth_personal
+# import these specific for authentication
 requests
+ua_parser
 
 
 # WEB DATA
