@@ -102,7 +102,7 @@ try:
     valid_username_password_pairs = json.loads(os.getenv("APP_AUTHENTICATION", default=None))
 except Exception as e:
     valid_username_password_pairs = None
-    print("[EXECPTION]", e)
+    print("[EXCEPTION]", e)
 
 # SYSTEM AND APP INFO
 # =============================================
@@ -114,15 +114,15 @@ python_version = sys.version.split()[0]
 dash_version = dash.__version__
 plotly_version = plotly.__version__
 
-print("[INFO   ] Run environment:", run_environment)
-print("[INFO   ] running on     : " + the_hostname)
-print("[INFO   ] run on env var : " + run_on)
-print("[INFO   ] app version    : " + app_version)
-print("[INFO   ] python version : " + python_version)
-print("[INFO   ] dash version   : " + dash_version)
-print("[INFO   ] plotly version : " + plotly_version)
-print("[INFO   ] mapboxtoken    : configured") if glb_mapbox_access_token is not None else print("[INFO   ] mapboxtoken    : not configured")
-print("[INFO   ] authentication : configured") if valid_username_password_pairs is not None else print("[INFO   ] authentication : not configured")
+print("[INFO     ] Run environment:", run_environment)
+print("[INFO     ] running on     : " + the_hostname)
+print("[INFO     ] run on env var : " + run_on)
+print("[INFO     ] app version    : " + app_version)
+print("[INFO     ] python version : " + python_version)
+print("[INFO     ] dash version   : " + dash_version)
+print("[INFO     ] plotly version : " + plotly_version)
+print("[INFO     ] mapboxtoken    : configured") if glb_mapbox_access_token is not None else print("[INFO   ] mapboxtoken    : not configured")
+print("[INFO     ] authentication : configured") if valid_username_password_pairs is not None else print("[INFO   ] authentication : not configured")
 
 # folders for output
 input_dir = "./data/final/"
