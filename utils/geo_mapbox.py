@@ -5,6 +5,11 @@ from numpy import array, interp
 # https://stackoverflow.com/questions/63787612/plotly-automatic-zooming-for-mapbox-maps
 #
 def zoom_center(lons, lats, width_to_height: float = 2.0) -> (float, dict):
+    """
+    lons:            list of lons`
+    lats:            list of lats
+    width_to_height: 
+    """
     maxlon, minlon = max(lons), min(lons)
     maxlat, minlat = max(lats), min(lats)
     center = {

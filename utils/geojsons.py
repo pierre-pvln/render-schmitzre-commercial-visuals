@@ -12,10 +12,11 @@ def boundingbox_and_geojson(
     center_lon, center_lat, r=0.1, bboxcolor="purple", verbose=False
 ):
     """
-    lon:       lon of center of bbox
-    lat:       lat of center of bbox
-    r:         baseline distance (10km = 0.1)
-    bboxcolor: color of line
+    center_lon: lon of center of bbox
+    center_lat: lat of center of bbox
+    r:          baseline distance (10km = 0.1)
+    bboxcolor:  color of line
+    verbose:    output to screen
     """
 
     lon_min = center_lon + r * -1
@@ -58,7 +59,8 @@ def circle_and_geojson(center_lon, center_lat, r=0.1, color="red", verbose=False
     center_lon: lon of center of bbox
     center_lat: lat of center of bbox
     r:          baseline distance (10km = 0.1)
-    color: color of line
+    color:      color of line
+    verbose:    output to screen
     """
 
     #    r = 0.75
@@ -106,6 +108,17 @@ def isochrone_and_geojson(
     mapbox_access_token,
     verbose=False,
 ):
+    """
+    lon_point:           lon of center of bbox
+    lat_point:           lat of center of bbox
+    polygontype_str:     wether or not to fill the polygon 'fill'
+    profile_str:         type of profile, either 'driving', 'cycling' or 'walking'
+    minutes_str:         minutes`
+    hex_colors_str:      color if hex`  
+    mapbox_access_token: mapbox access token
+    verbose:             output to screen
+    """
+
     # https://api.mapbox.com/isochrone/v1/mapbox/driving/-118.22258,33.99038?contours_minutes=5,10,15&contours_colors=6706ce,04e813,4286f4&polygons=true&access_token=pk.eyJ1IjoicGllcnJldmVlbGVuIiwiYSI6ImNra3V6Z2JhNTFjeXUycHBjdWVkOXUxdDMifQ.tzOHbTKha9Co8-s_AarPJg
     if polygontype_str == "fill":
         opacity = 0.3

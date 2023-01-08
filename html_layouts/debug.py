@@ -2,6 +2,7 @@
 #
 # GEEN FUNCTIES/LOGICA UITVOEREN IN DIT BESTAND.
 # ENKEL BEDOELD OM EEN LAYOUT ELEMENT TE DEFINIEREN
+# AANPASSINGEN VIA CALLBACK OUTPUTS
 #
 # @version    v0.0.2  2022-12-02
 # @author     pierre@ipheion.eu
@@ -17,6 +18,7 @@
 #
 # ############################################################################
 
+# Visualization modules
 import dash_bootstrap_components as dbc
 from dash import html
 

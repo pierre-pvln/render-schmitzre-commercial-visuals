@@ -18,8 +18,8 @@
 #
 # ############################################################################
 
-import dash_bootstrap_components as dbc
 # Visualization modules
+import dash_bootstrap_components as dbc
 import dash_daq as daq
 from dash import dash_table, dcc, html
 
@@ -220,6 +220,7 @@ def DATATABLE_RESULTS_ROW(RadioItemOptions, RadioItemValue, TableColumnSettings)
                             html.Br([],),
                         ],
                         # styling used to show / not show the table
+                        # default setting is hidden
                         style={
                             # "borderStyle": "solid",
                             # "borderWidth": "1px",

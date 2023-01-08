@@ -10,8 +10,11 @@
 # - cleaned up version of v45
 # v48
 # - zoom updated per radio switch item
+# v49
+# - basic authentication added
+#
 
-app_version = "v48"
+app_version = "v49"
 # put the name of this python file in txt file for processing by other scripts
 with open("_current_app_version.txt", "w") as version_file:
     version_file.write(app_version + "\n")
@@ -32,11 +35,16 @@ import dash_bootstrap_components as dbc
 # data wrangling modules
 import numpy as np
 import pandas as pd
+from numpy import cos, pi, sin
+
 import plotly
 from dash import Dash, dcc, html
 from dash.dash_table.Format import Align, Format, Group
 from dash.dependencies import Input, Output, State
-from numpy import cos, pi, sin
+
+# authentication
+import dash_auth_personal
+
 # geo stuff
 # https://stackoverflow.com/questions/43892459/check-if-geo-point-is-inside-or-outside-of-polygon
 from shapely.geometry import Point, shape
@@ -51,19 +59,17 @@ from utils.geo_mapbox import zoom_center
 from utils.geojsons import (boundingbox_and_geojson, circle_and_geojson,
                             isochrone_and_geojson)
 
-run_environment = "production"
-print("[INFO   ] ==== START ===")
-print("[INFO   ] Run environment:", run_environment)
-
 ####################################################
 # DEFINE GENERICALLY USED VARS
 ####################################################
 # initialize some globally used vars
 
+run_environment = "production"
+
 if run_environment == "tst":
     glb_verbose = True  # True
     glb_fxn_verbose = 3  # 3
-    # 0 = Don't output any text
+    # 0 = Don't output anything from function
     # 1 = Show only function name
     # 2 = Show function input values
     # 3 = Show additional info
@@ -71,15 +77,15 @@ if run_environment == "tst":
 elif run_environment == "acc":
     glb_verbose = True  # True
     glb_fxn_verbose = 2  # 2
-    # 0 = Don't output any text
+    # 0 = Don't output anything from function
     # 1 = Show only function name
     # 2 = Show function input values
     # 3 = Show additional info
     glb_hide_debug_text = False
-else:
+else:  # assumes production => minimum output
     glb_verbose = False
     glb_fxn_verbose = 0
-    # 0 = Don't output any text
+    # 0 = Don't output anything from function
     # 1 = Show only function name
     # 2 = Show function input values
     # 3 = Show additional info
@@ -92,6 +98,12 @@ o_glb_selected_municipality_name = (
 
 glb_mapbox_access_token = os.getenv("MAPBOX_ACCESS_TOKEN", default=None)
 
+try:
+    valid_username_password_pairs = json.loads(os.getenv("APP_AUTHENTICATION", default=None))
+except Exception as e:
+    valid_username_password_pairs = None
+    print("[EXECPTION]", e)
+
 # SYSTEM AND APP INFO
 # =============================================
 the_hostname = socket.gethostname()
@@ -102,13 +114,15 @@ python_version = sys.version.split()[0]
 dash_version = dash.__version__
 plotly_version = plotly.__version__
 
-print("Running on     : " + the_hostname)
-print("Run on env var : " + run_on)
-print("App version    : " + app_version)
-print("Python version : " + python_version)
-print("dash version   : " + dash_version)
-print("plotly version : " + plotly_version)
-
+print("[INFO   ] Run environment:", run_environment)
+print("[INFO   ] running on     : " + the_hostname)
+print("[INFO   ] run on env var : " + run_on)
+print("[INFO   ] app version    : " + app_version)
+print("[INFO   ] python version : " + python_version)
+print("[INFO   ] dash version   : " + dash_version)
+print("[INFO   ] plotly version : " + plotly_version)
+print("[INFO   ] mapboxtoken    : configured") if glb_mapbox_access_token is not None else print("[INFO   ] mapboxtoken    : not configured")
+print("[INFO   ] authentication : configured") if valid_username_password_pairs is not None else print("[INFO   ] authentication : not configured")
 
 # folders for output
 input_dir = "./data/final/"
@@ -1029,6 +1043,18 @@ app = Dash(
     meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}],
     external_stylesheets=external_stylesheets,
 )
+
+# ToDo look into this
+# - the basic auth has to be updated
+# - check if we can get userid from it
+if valid_username_password_pairs is not None:
+    print(valid_username_password_pairs)
+    # adding authentication
+    auth = dash_auth_personal.BasicAuth(
+        app,
+        valid_username_password_pairs
+    )
+
 app.title = "Ipheion Demo Dashboard"
 app.config["update_title"] = ".. Renewing .."
 # ToDo html page title to location that is viewed
