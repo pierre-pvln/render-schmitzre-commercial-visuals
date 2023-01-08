@@ -27,7 +27,7 @@ dash-daq==0.5.0
 # import these specific for authentication
 requests
 ua_parser
-
+chart_studio
 
 # WEB DATA
 urllib3==1.26.9
