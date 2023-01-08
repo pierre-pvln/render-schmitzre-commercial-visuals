@@ -20,9 +20,12 @@ plotly==5.7.0
 dash==2.3.1
 dash-bootstrap-components==1.1.0
 dash-daq==0.5.0
+
 # basic authentication
-# is work in progress. Using local dash_auth_personal
 #dash-auth==1.4.1
+# is work in progress. Using local dash_auth_personal
+requests
+
 
 # WEB DATA
 urllib3==1.26.9
