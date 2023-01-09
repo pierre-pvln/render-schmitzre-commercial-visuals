@@ -14,7 +14,7 @@
 # - basic authentication added
 #
 
-app_version = "v49"
+app_version = "v50"
 # put the name of this python file in txt file for processing by other scripts
 with open("_current_app_version.txt", "w") as version_file:
     version_file.write(app_version + "\n")
@@ -1044,7 +1044,7 @@ app = Dash(
     external_stylesheets=external_stylesheets,
 )
 
-# ToDo look into this
+# ToDo look into this. Authentication should return the logged-in username
 # - the basic auth has to be updated
 # - check if we can get userid from it
 if valid_username_password_pairs is not None:
@@ -1091,14 +1091,15 @@ app.layout = html.Div(
                 dbc.Col(
                     [
                         rows.MUNICIPALITY_NAME_SELECTION_ROW(
-                            "Select Municipality", municipality_names
+                            "Select municipality", municipality_names
                         ),
                         html.Br(),
                         rows.SWITCH_AND_SELECTION_ROW(
                             SelectionName=company_selection_text,
-                            SelectionText="Show Company locations",
-                            DropDownPlaceholderText="Select 1 or more enterprises",
+                            SelectionText="Show company locations",
+                            DropDownPlaceholderText="Select 1 or more companies",
                             DropDownOptions=enterprise_options,
+                            DropDownOptionTitle="Company options"
                         ),
                         html.Br(),
                         rows.SWITCH_AND_SELECTION_ROW(
@@ -1106,20 +1107,23 @@ app.layout = html.Div(
                             SelectionText="Show municipality types",
                             DropDownPlaceholderText="Select 1 or more municipality types",
                             DropDownOptions=municipality_options,
+                            DropDownOptionTitle="Municipality type options"
                         ),
                         html.Br(),
                         rows.SWITCH_AND_SELECTION_ROW(
                             SelectionName=netzknoten_selection_text,
-                            SelectionText="Show Netzknoten locations",
+                            SelectionText="Show netzknoten locations",
                             DropDownPlaceholderText="Select 1 or more netzknoten",
                             DropDownOptions=netzknoten_options,
+                            DropDownOptionTitle="Netzknoten options"
                         ),
                         html.Br(),
                         rows.SWITCH_AND_SELECTION_ROW(
                             SelectionName=prediction_selection_text,
-                            SelectionText="Show Predicted locations",
+                            SelectionText="Show predicted locations",
                             DropDownPlaceholderText="Select 1 or more predictions",
                             DropDownOptions=prediction_options,
+                            DropDownOptionTitle="Prediction type options"
                         ),
                         html.Br(),
                         rows.DATATABLE_RESULTS_ROW(
@@ -1747,9 +1751,9 @@ def status_company_selection(
     else:  # enabled the selection options
         o_switch_set = False
 
-    if len(i_selection_val) == 0:  # empty selection text
+    if len(i_selection_val) == 0:  # empty legend text
         o_legend_text = []
-    else:  # some selections made
+    else:  # some selections made => show legend text
         o_legend_text = [
             html.Div(
                 ["COMMERCIAL POINTS:"],
@@ -1796,9 +1800,9 @@ def status_municipality_selection(
     else:  # enabled the selection options
         o_switch_set = False
 
-    if len(i_selection_val) == 0:  # empty selection text
+    if len(i_selection_val) == 0:  # empty legend text
         o_legend_text = []
-    else:  # some selections made
+    else:  # some selections made => shop legend text
         o_legend_text = [
             html.Div(
                 ["MUNICIPALITY POINTS:"],

@@ -19,7 +19,7 @@ class BasicAuth(Auth):
         username, password = username_password_utf8.split(':', 1)
         return self._users.get(username) == password
 
-    # ToDo add better response text
+    # ToDo add better response text (HTML formatted)
     def login_request(self):
         return flask.Response(
             'Login Required for this page',

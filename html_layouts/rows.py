@@ -42,7 +42,13 @@ def MAP_ROW(id_name, settings, a_figure):
 def MUNICIPALITY_NAME_SELECTION_ROW(SelectionText, DropDownOptions):
     return dbc.Row(  # Municipality
         [
-            dbc.Col([html.P([SelectionText],)], width=3),
+            dbc.Col(
+                [html.P([SelectionText],)],
+                style={
+                    # "border-style": "solid"
+                    "marginLeft": "10px",
+                },
+                width=3),
             dbc.Col(
                 [
                     # https://dash.plotly.com/dash-core-components/dropdown
@@ -57,14 +63,14 @@ def MUNICIPALITY_NAME_SELECTION_ROW(SelectionText, DropDownOptions):
                         disabled=False,
                     ),
                 ],
-                width=9,
+                width=8,
             ),
         ]
     )
 
 
 def SWITCH_AND_SELECTION_ROW(
-    SelectionName, SelectionText, DropDownPlaceholderText, DropDownOptions
+    SelectionName, SelectionText, DropDownPlaceholderText, DropDownOptions, DropDownOptionTitle="Options"
 ):
     return dbc.Row(  # Netzknoten
         [
@@ -74,13 +80,16 @@ def SWITCH_AND_SELECTION_ROW(
                     daq.BooleanSwitch(id=SelectionName + "-switch", on=True,),
                 ],
                 id=SelectionName + "-switch-column",
-                # style={"border-style": "solid"},
+                style={
+                    # "border-style": "solid"
+                    "marginLeft": "10px",
+                },
                 width=3,
             ),
             dbc.Col(
                 # create a dropdown selection for the netzknoten
                 [
-                    html.P(["Options"],),
+                    html.P([DropDownOptionTitle],),
                     # https://dash.plotly.com/dash-core-components/dropdown
                     dcc.Dropdown(
                         id=SelectionName + "-selection",
@@ -95,7 +104,7 @@ def SWITCH_AND_SELECTION_ROW(
                     ),
                 ],
                 id=SelectionName + "-dropdown-column",
-                width=9,
+                width=8,
                 # style={"borderStyle": "solid"}
             ),
         ],
