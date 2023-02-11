@@ -13,8 +13,10 @@
 # v49
 # - basic authentication added
 #
+# v51
+# - new file name for companies
 
-app_version = "v50"
+app_version = "v51"
 # put the name of this python file in txt file for processing by other scripts
 with open("_current_app_version.txt", "w") as version_file:
     version_file.write(app_version + "\n")
@@ -128,7 +130,8 @@ print("[INFO     ] authentication : configured") if valid_username_password_pair
 input_dir = "./data/final/"
 
 # datasets
-company_subset = "Company"
+#company_subset = "Company"
+company_subset = "Companies_LATEST"
 municipality_subset = "Municipality"
 netzknoten_subset = "Netzknoten"
 prediction_subset_10Km = "10Km_combined_prediction_df"
@@ -337,6 +340,7 @@ def select_datatable_subset(
         print("municipality   :", municipality)
         print("selectiontype  :", selectiontype)
 
+    # UPDATE: this one when additional company is added
     columns_list = [
         "uniform_city_name",
         "lon",
@@ -346,6 +350,7 @@ def select_datatable_subset(
         "count_McD",
         "count_KFC",
         "count_MFT",
+        "count_FTX",
     ]
     subset_df = pd.DataFrame(columns=columns_list)
     subset_df_total = pd.DataFrame(columns=columns_list)
@@ -506,7 +511,7 @@ def select_datatable_subset(
 
     return subset_df, subset_df_total
 
-
+# UPDATE: this one when additional company is added
 def settings_table_columns():
     # https://dash.plotly.com/datatable/data-formatting
     table_column_settings = [
@@ -546,6 +551,12 @@ def settings_table_columns():
             type="numeric",
             format=Format(group_delimiter=".", group=Group.yes, groups=[3]),
         ),
+        dict(
+            id="count_FTX",
+            name="Anzahl FTX",
+            type="numeric",
+            format=Format(group_delimiter=".", group=Group.yes, groups=[3]),
+        ),
     ]
 
     return table_column_settings
@@ -562,13 +573,18 @@ def update_municipalities_in_table_data_dict_list(inputdf, fxn_verbose=0):
 
     toprow = "<b>" + inputdf["uniform_city_name"] + "</b><br>"
     inwoners = "<br>" + "Einwohner    : " + inputdf["insgesamt"].astype(int).astype(str)
+
+    # UPDATE: this one when additional company is added
     cnt_bk = "<br>" + "# Burgerking : " + inputdf["count_BK"].astype(int).astype(str)
     cnt_mcd = "<br>" + "# Mc Donalds : " + inputdf["count_McD"].astype(int).astype(str)
     cnt_kfc = "<br>" + "# KFC        : " + inputdf["count_KFC"].astype(int).astype(str)
     cnt_mft = "<br>" + "# MacFIT     : " + inputdf["count_MFT"].astype(int).astype(str)
+    cnt_ftx = "<br>" + "# FitX       : " + inputdf["count_FTX"].astype(int).astype(str)
 
+    # UPDATE: this one when additional company is added
     # create column with specific hovertext
-    inputdf["hovertext"] = toprow + inwoners + cnt_bk + cnt_mcd + cnt_kfc + cnt_mft
+#    inputdf["hovertext"] = toprow + inwoners + cnt_bk + cnt_mcd + cnt_kfc + cnt_mft
+    inputdf["hovertext"] = toprow + inwoners + cnt_bk + cnt_mcd + cnt_kfc + cnt_mft + cnt_ftx
 
     if len(inputdf) >= 1:
         # print(inputdf.columns)
@@ -1759,10 +1775,12 @@ def status_company_selection(
                 ["COMMERCIAL POINTS:"],
                 style={"fontWeight": "bold", "color": "black", "marginRight": "10px"},
             ),
+            # UPDATE: this one when additional company is added
             html.Div(["Mc Donalds"], style={"color": "red", "marginRight": "10px"}),
             html.Div(["Burger King"], style={"color": "blue", "marginRight": "10px"}),
             html.Div(["KFC"], style={"color": "green", "marginRight": "10px"}),
             html.Div(["McFIT"], style={"color": "orange", "marginRight": "10px"}),
+            html.Div(["FitX"], style={"color": "purple", "marginRight": "10px"}),
         ]
 
     return o_switch_set, o_legend_text

@@ -174,14 +174,11 @@ def company_data_dict_list(inputdf, subset_name, fxn_verbose=0):
             symbol="circle",  # name of icon in icon set or "circle"
             size=10,
             color=[
-                "blue"
-                if x == "BurgerKing"
-                else "red"
-                if x == "McDonalds"
-                else "green"
-                if x == "KentuckyFriedChicken"
-                else "orange"
-                if x == "McFIT"
+                "blue" if x == "BurgerKing"
+                else "red" if x == "McDonalds"
+                else "green" if x == "KentuckyFriedChicken"
+                else "orange" if x == "McFIT"
+                else "purple" if x == "FitX"
                 else "yellow"
                 for x in list(inputdf["enterprise"])
             ],
