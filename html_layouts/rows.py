@@ -151,6 +151,8 @@ def DATATABLE_RESULTS_ROW(RadioItemOptions, RadioItemValue, TableColumnSettings)
                                 style_table={"overflowY": "auto"},  # 'height': '300px',
                                 # keep heading on 1 line, wrap the data
                                 style_data={"whiteSpace": "normal", "height": "auto"},
+
+                                # CHANGE HERE WHEN NEW COMPANY IS ADDED
                                 style_cell_conditional=[
                                     {
                                         "if": {"column_id": "uniform_city_name"},
@@ -179,6 +181,11 @@ def DATATABLE_RESULTS_ROW(RadioItemOptions, RadioItemValue, TableColumnSettings)
                                     },
                                     {
                                         "if": {"column_id": "count_MFT"},
+                                        "width": "25px",
+                                        "fontSize": "12px",
+                                    },
+                                    {
+                                        "if": {"column_id": "count_FTX"},
                                         "width": "25px",
                                         "fontSize": "12px",
                                     },
@@ -193,6 +200,8 @@ def DATATABLE_RESULTS_ROW(RadioItemOptions, RadioItemValue, TableColumnSettings)
                                 style_table={"overflowY": "auto"},  # 'height': '300px',
                                 # keep heading on 1 line, wrap the data
                                 style_data={"whiteSpace": "normal", "height": "auto"},
+
+                                # CHANGE HERE WHEN NEW COMPANY IS ADDED
                                 style_cell_conditional=[
                                     {
                                         "if": {"column_id": "uniform_city_name"},
@@ -224,6 +233,12 @@ def DATATABLE_RESULTS_ROW(RadioItemOptions, RadioItemValue, TableColumnSettings)
                                         "width": "25px",
                                         "fontSize": "12px",
                                     },
+                                    {
+                                        "if": {"column_id": "count_FTX"},
+                                        "width": "25px",
+                                        "fontSize": "12px",
+                                    },
+
                                 ],
                             ),
                             html.Br([],),

@@ -67,6 +67,7 @@ from utils.geojsons import (boundingbox_and_geojson, circle_and_geojson,
 # initialize some globally used vars
 
 run_environment = "production"
+#run_environment = "tst"
 
 if run_environment == "tst":
     glb_verbose = True  # True
@@ -130,19 +131,19 @@ print("[INFO     ] authentication : configured") if valid_username_password_pair
 input_dir = "./data/final/"
 
 # datasets
-#company_subset = "Company"
-company_subset = "Companies_LATEST"
+company_subset = "Companies"
+baseline = "Baseline"
+
 municipality_subset = "Municipality"
 netzknoten_subset = "Netzknoten"
 prediction_subset_10Km = "10Km_combined_prediction_df"
 prediction_subset_20Km = "20Km_combined_prediction_df"
 selected_municipality_subset = "SelectedMunicipality"
-baseline = "Baseline"
 
 # Company
 # ==================================================
 # read company data from file
-df_company = pd.read_csv(input_dir + company_subset + ".csv")
+df_company = pd.read_csv(input_dir + "com/" + company_subset + "_LATEST" + ".csv")  # Using new file and folder structure
 df_company = df_company.rename(columns={"latitude": "lat", "longitude": "lon"})
 # remove any empty values
 df_company.dropna(subset=["uniform_city_name"], inplace=True)
@@ -187,11 +188,12 @@ all_municipality_values = df_municipality["grad_der_verstädterung"].unique().to
 all_municipality_names = sorted(df_municipality["uniform_city_name"].unique().tolist())
 municipality_names = [{"label": i, "value": i} for i in all_municipality_names]
 
+# Baseline
+# ==================================================
 # read baseline data from file
 # TODO wat is verschil tussen baseline en municiplaity bestand?
 # TODO en moet municiplaity bestand niet vervangen worden door baseline?
-input_filename = input_dir + baseline
-df_baseline = pd.read_csv(input_filename + ".csv")
+df_baseline = pd.read_csv(input_dir + "com/" + baseline + "_LATEST" + ".csv")  # Using new file and folder structure
 df_baseline.dropna(subset=["uniform_city_name"], inplace=True)
 if glb_verbose:
     print("[INFO   ] len(" + baseline + ") :", len(df_baseline))
@@ -340,7 +342,7 @@ def select_datatable_subset(
         print("municipality   :", municipality)
         print("selectiontype  :", selectiontype)
 
-    # UPDATE: this one when additional company is added
+    # CHANGE HERE WHEN NEW COMPANY IS ADDED
     columns_list = [
         "uniform_city_name",
         "lon",
@@ -511,7 +513,7 @@ def select_datatable_subset(
 
     return subset_df, subset_df_total
 
-# UPDATE: this one when additional company is added
+# CHANGE HERE WHEN NEW COMPANY IS ADDED
 def settings_table_columns():
     # https://dash.plotly.com/datatable/data-formatting
     table_column_settings = [
@@ -562,6 +564,7 @@ def settings_table_columns():
     return table_column_settings
 
 
+# CHANGE HERE WHEN NEW COMPANY IS ADDED
 def update_municipalities_in_table_data_dict_list(inputdf, fxn_verbose=0):
     # shows all the municipalities that are present in the data table on the map
     if fxn_verbose > 0:
@@ -574,16 +577,15 @@ def update_municipalities_in_table_data_dict_list(inputdf, fxn_verbose=0):
     toprow = "<b>" + inputdf["uniform_city_name"] + "</b><br>"
     inwoners = "<br>" + "Einwohner    : " + inputdf["insgesamt"].astype(int).astype(str)
 
-    # UPDATE: this one when additional company is added
+    # CHANGE HERE WHEN NEW COMPANY IS ADDED
     cnt_bk = "<br>" + "# Burgerking : " + inputdf["count_BK"].astype(int).astype(str)
     cnt_mcd = "<br>" + "# Mc Donalds : " + inputdf["count_McD"].astype(int).astype(str)
     cnt_kfc = "<br>" + "# KFC        : " + inputdf["count_KFC"].astype(int).astype(str)
     cnt_mft = "<br>" + "# MacFIT     : " + inputdf["count_MFT"].astype(int).astype(str)
     cnt_ftx = "<br>" + "# FitX       : " + inputdf["count_FTX"].astype(int).astype(str)
 
-    # UPDATE: this one when additional company is added
+    # CHANGE HERE WHEN NEW COMPANY IS ADDED
     # create column with specific hovertext
-#    inputdf["hovertext"] = toprow + inwoners + cnt_bk + cnt_mcd + cnt_kfc + cnt_mft
     inputdf["hovertext"] = toprow + inwoners + cnt_bk + cnt_mcd + cnt_kfc + cnt_mft + cnt_ftx
 
     if len(inputdf) >= 1:
@@ -1629,9 +1631,11 @@ def update_overview(
         if glb_fxn_verbose > 2:
             print("Point on curve: " + str(curve_number))
             print("Point on curve: " + curve_name)
+            print("Point number  : " + str(i_graph_clickdata["points"][0]["pointNumber"]))
 
         # check if location was clicked in one of the relevant curves
         # if so, create the polygon that was selected by the radio button
+
         if curve_name in [
             "Municipality",
             "SelectedMunicipality",
@@ -1642,10 +1646,10 @@ def update_overview(
             "mittlere Besiedlungsdichte-Kreissitz",
             "gering besiedelt",
             "gering besiedelt-Kreissitz",
-            "Company",
+            "Companies",
             "_10Km_combined_prediction_df",
             "_20Km_combined_prediction_df",
-            "selected location",
+            "selected Location",
         ]:
             (
                 glb_datatable_geojson,
@@ -1674,7 +1678,7 @@ def update_overview(
             glb_latest_municipality = i_graph_clickdata["points"][0]["customdata"]
 
         # When point clicked is on Company Curves
-        if curve_name in ["Company"]:
+        if curve_name in ["Companies"]:
             glb_latest_municipality = i_graph_clickdata["points"][0]["customdata"]
 
         # When point clicked is on Prediction Curves
@@ -1775,7 +1779,7 @@ def status_company_selection(
                 ["COMMERCIAL POINTS:"],
                 style={"fontWeight": "bold", "color": "black", "marginRight": "10px"},
             ),
-            # UPDATE: this one when additional company is added
+            # CHANGE HERE WHEN NEW COMPANY IS ADDED
             html.Div(["Mc Donalds"], style={"color": "red", "marginRight": "10px"}),
             html.Div(["Burger King"], style={"color": "blue", "marginRight": "10px"}),
             html.Div(["KFC"], style={"color": "green", "marginRight": "10px"}),

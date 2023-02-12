@@ -1,6 +1,7 @@
 def point_on_map_data_dict_list(inputdf, subset_name, fxn_verbose=0):
     if fxn_verbose > 0:
-        print("\n[FUNCTION] point_on_map_data_dict_list")
+        print()
+        print("[FUNCTION] point_on_map_data_dict_list")
     if fxn_verbose > 1:
         print("len inputdf    :", len(inputdf))
         print("columns inputdf:", inputdf.columns)
@@ -48,7 +49,8 @@ def point_on_map_data_dict_list(inputdf, subset_name, fxn_verbose=0):
 
 def municipality_data_dict_list(inputdf, subset_name, fxn_verbose=0):
     if fxn_verbose > 0:
-        print("\n[FUNCTION] point_on_map_data_dict_list")
+        print()
+        print("[FUNCTION] point_on_map_data_dict_list")
     if fxn_verbose > 1:
         print("len inputdf    :", len(inputdf))
         print("columns inputdf:", inputdf.columns)
@@ -133,7 +135,8 @@ def municipality_data_dict_list(inputdf, subset_name, fxn_verbose=0):
 
 def company_data_dict_list(inputdf, subset_name, fxn_verbose=0):
     if fxn_verbose > 0:
-        print("\n[FUNCTION] company_data_dict_list")
+        print()
+        print("[FUNCTION] company_data_dict_list")
     if fxn_verbose > 1:
         print("len inputdf    :", len(inputdf))
         print("columns inputdf:", inputdf.columns)
@@ -170,6 +173,8 @@ def company_data_dict_list(inputdf, subset_name, fxn_verbose=0):
         + "<extra>Company</extra>",
         # Set marker colors based on values
         # https://stackoverflow.com/questions/61686382/change-the-text-color-of-cells-in-plotly-table-based-on-value-string
+
+        # CHANGE HERE WHEN NEW COMPANY IS ADDED
         marker=dict(
             symbol="circle",  # name of icon in icon set or "circle"
             size=10,
@@ -190,7 +195,8 @@ def company_data_dict_list(inputdf, subset_name, fxn_verbose=0):
 
 def netzknoten_data_dict_list(inputdf, subset_name, fxn_verbose=0):
     if fxn_verbose > 0:
-        print("\n[FUNCTION] netzknoten_data_dict_list")
+        print()
+        print("[FUNCTION] netzknoten_data_dict_list")
     if fxn_verbose > 1:
         print("len inputdf    :", len(inputdf))
         print("columns inputdf:", inputdf.columns)
@@ -237,7 +243,8 @@ def netzknoten_data_dict_list(inputdf, subset_name, fxn_verbose=0):
 
 def prediction_10km_data_dict_list(inputdf, subset_name, fxn_verbose=0):
     if fxn_verbose > 0:
-        print("\n[FUNCTION] prediction_10km_data_dict_list")
+        print()
+        print("[FUNCTION] prediction_10km_data_dict_list")
     if fxn_verbose > 1:
         print("len inputdf    :", len(inputdf))
         print("columns inputdf:", inputdf.columns)
@@ -288,7 +295,8 @@ def prediction_10km_data_dict_list(inputdf, subset_name, fxn_verbose=0):
 
 def prediction_20km_data_dict_list(inputdf, subset_name, fxn_verbose=0):
     if fxn_verbose > 0:
-        print("\n[FUNCTION] prediction_20km_data_dict_list")
+        print()
+        print("[FUNCTION] prediction_20km_data_dict_list")
     if fxn_verbose > 1:
         print("len inputdf    :", len(inputdf))
         print("columns inputdf:", inputdf.columns)
@@ -339,7 +347,8 @@ def prediction_20km_data_dict_list(inputdf, subset_name, fxn_verbose=0):
 
 def selected_municipality_data_dict_list(inputdf, subset_name, fxn_verbose=0):
     if fxn_verbose > 0:
-        print("\n[FUNCTION] selected_municipality_data_dict_list")
+        print()
+        print("[FUNCTION] selected_municipality_data_dict_list")
     if fxn_verbose > 1:
         print("len inputdf    :", len(inputdf))
         print("columns inputdf:", inputdf.columns)
