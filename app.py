@@ -16,7 +16,14 @@
 # v51
 # - new file name for companies
 
-app_version = "v51"
+# v52
+# - added John Reed
+# - removed prediction ### as comments
+
+# v53
+# - added PlayGrounds
+
+app_version = "v53"
 # put the name of this python file in txt file for processing by other scripts
 with open("_current_app_version.txt", "w") as version_file:
     version_file.write(app_version + "\n")
@@ -94,6 +101,16 @@ else:  # assumes production => minimum output
     # 3 = Show additional info
     glb_hide_debug_text = True
 
+# get parameters
+# =================
+with open("./visualisation_parameters.json", "r") as jsonf:
+    CONFIG = json.load(jsonf)
+
+# folders for input
+input_commercial = CONFIG["local_dataset"]["folderpath_commercial"]
+input_government = CONFIG["local_dataset"]["folderpath_government"]
+input_prediction = CONFIG["local_dataset"]["folderpath_prediction"]
+datasets_ui_dict = CONFIG["data"]
 
 o_glb_selected_municipality_name = (
     strings.HEADER_SUBTITLE
@@ -127,9 +144,6 @@ print("[INFO     ] plotly version : " + plotly_version)
 print("[INFO     ] mapboxtoken    : configured") if glb_mapbox_access_token is not None else print("[INFO   ] mapboxtoken    : not configured")
 print("[INFO     ] authentication : configured") if valid_username_password_pairs is not None else print("[INFO   ] authentication : not configured")
 
-# folders for output
-input_dir = "./data/final/"
-
 # datasets
 company_subset = "Companies"
 baseline = "Baseline"
@@ -143,7 +157,7 @@ selected_municipality_subset = "SelectedMunicipality"
 # Company
 # ==================================================
 # read company data from file
-df_company = pd.read_csv(input_dir + "com/" + company_subset + "_LATEST" + ".csv")  # Using new file and folder structure
+df_company = pd.read_csv(input_commercial + company_subset + "_LATEST" + ".csv")  # Using new file and folder structure
 df_company = df_company.rename(columns={"latitude": "lat", "longitude": "lon"})
 # remove any empty values
 df_company.dropna(subset=["uniform_city_name"], inplace=True)
@@ -162,7 +176,7 @@ all_enterprise_values = df_company["enterprise"].unique().tolist()
 # Municipality
 # ==================================================
 # read municipality data from file
-df_municipality = pd.read_csv(input_dir + municipality_subset + ".csv")
+df_municipality = pd.read_csv(input_government + municipality_subset + ".csv")
 df_municipality = df_municipality.rename(
     columns={"breitengrad": "lat", "längengrad": "lon"}
 )
@@ -193,7 +207,7 @@ municipality_names = [{"label": i, "value": i} for i in all_municipality_names]
 # read baseline data from file
 # TODO wat is verschil tussen baseline en municiplaity bestand?
 # TODO en moet municiplaity bestand niet vervangen worden door baseline?
-df_baseline = pd.read_csv(input_dir + "com/" + baseline + "_LATEST" + ".csv")  # Using new file and folder structure
+df_baseline = pd.read_csv(input_commercial + baseline + "_LATEST" + ".csv")  # Using new file and folder structure
 df_baseline.dropna(subset=["uniform_city_name"], inplace=True)
 if glb_verbose:
     print("[INFO   ] len(" + baseline + ") :", len(df_baseline))
@@ -203,7 +217,7 @@ if glb_verbose:
 # Netzknoten
 # ==================================================
 # read netzknoten data from file
-glb_df_netzknoten = pd.read_csv(input_dir + netzknoten_subset + ".csv")
+glb_df_netzknoten = pd.read_csv(input_government + netzknoten_subset + ".csv")
 # initialize df with filtered data
 glb_df_netzknoten_filtered = pd.DataFrame(columns=glb_df_netzknoten.columns)
 if glb_verbose:
@@ -219,7 +233,7 @@ all_netzknoten_values = glb_df_netzknoten["NK_GeoStrKls"].unique().tolist()
 # Prediction 10 km
 # ==================================================
 # read prediction data from file
-df_prediction_10Km = pd.read_csv(input_dir + prediction_subset_10Km + ".csv")
+df_prediction_10Km = pd.read_csv(input_prediction + prediction_subset_10Km + ".csv")
 # initialize df with filtered data
 df_prediction_10Km_filtered = pd.DataFrame(columns=df_prediction_10Km.columns)
 if glb_verbose:
@@ -229,7 +243,7 @@ if glb_verbose:
 # Prediction 20 km
 # ==================================================
 # read prediction data from file
-df_prediction_20Km = pd.read_csv(input_dir + prediction_subset_20Km + ".csv")
+df_prediction_20Km = pd.read_csv(input_prediction + prediction_subset_20Km + ".csv")
 # initialize df with filtered data
 df_prediction_20Km_filtered = pd.DataFrame(columns=df_prediction_20Km.columns)
 if glb_verbose:
@@ -311,6 +325,7 @@ def select_datatable_subset(
     lat,
     geojson,
     municipality,
+    ui_dict,
     selectiontype=default_radio_item_selection,
     fxn_verbose=0,
 ):
@@ -327,6 +342,7 @@ def select_datatable_subset(
                    #circle20: within circle with 10km radius
                    #circle10: circle with radius 10 km
                    #circle20: circle with radius 20 km
+    ui_dict        user interface settings for datasets
     fxn_verbose    boolean; wether or not to verbose output from this function
     """
 
@@ -342,18 +358,20 @@ def select_datatable_subset(
         print("municipality   :", municipality)
         print("selectiontype  :", selectiontype)
 
-    # CHANGE HERE WHEN NEW COMPANY IS ADDED
-    columns_list = [
+    # @CH@ CHANGE HERE WHEN NEW COMPANY IS ADDED
+    # info of columns should be present in visualisation_parameters.json
+    columns_list_baseline = [
         "uniform_city_name",
         "lon",
         "lat",
         "insgesamt",
-        "count_BK",
-        "count_McD",
-        "count_KFC",
-        "count_MFT",
-        "count_FTX",
     ]
+    columns_list_datasets = []
+    for dataset in ui_dict["to_use"]:  # loop over all required datasets
+        columns_list_datasets.append(ui_dict[dataset]["columnname"])  # get column name for that dataset
+
+    columns_list = columns_list_baseline + columns_list_datasets
+
     subset_df = pd.DataFrame(columns=columns_list)
     subset_df_total = pd.DataFrame(columns=columns_list)
 
@@ -513,10 +531,12 @@ def select_datatable_subset(
 
     return subset_df, subset_df_total
 
-# CHANGE HERE WHEN NEW COMPANY IS ADDED
-def settings_table_columns():
+# @CH@ CHANGE HERE WHEN NEW COMPANY IS ADDED
+# info of columns should be present in visualisation_parameters.json
+def settings_table_columns(ui_dict):
     # https://dash.plotly.com/datatable/data-formatting
-    table_column_settings = [
+
+    table_column_settings_baseline = [
         dict(
             id="uniform_city_name",
             name="Gemeinde",
@@ -529,43 +549,25 @@ def settings_table_columns():
             type="numeric",
             format=Format(group_delimiter=".", group=Group.yes, groups=[3]),
         ),
-        dict(
-            id="count_BK",
-            name="Anzahl BK",
-            type="numeric",
-            format=Format(group_delimiter=".", group=Group.yes, groups=[3]),
-        ),
-        dict(
-            id="count_McD",
-            name="Anzahl McD",
-            type="numeric",
-            format=Format(group_delimiter=".", group=Group.yes, groups=[3]),
-        ),
-        dict(
-            id="count_KFC",
-            name="Anzahl KFC",
-            type="numeric",
-            format=Format(group_delimiter=".", group=Group.yes, groups=[3]),
-        ),
-        dict(
-            id="count_MFT",
-            name="Anzahl MFT",
-            type="numeric",
-            format=Format(group_delimiter=".", group=Group.yes, groups=[3]),
-        ),
-        dict(
-            id="count_FTX",
-            name="Anzahl FTX",
-            type="numeric",
-            format=Format(group_delimiter=".", group=Group.yes, groups=[3]),
-        ),
     ]
 
+    table_column_settings_datasets = []
+    for dataset in ui_dict["to_use"]:  # loop over all required datasets
+        table_dict = dict(
+            id=ui_dict[dataset]["columnname"],
+            name=ui_dict[dataset]["tablecolumnname"],
+            type="numeric",
+            format=Format(group_delimiter=".", group=Group.yes, groups=[3]),
+        )
+        table_column_settings_datasets.append(table_dict)  # get column name for that dataset
+
+    table_column_settings = table_column_settings_baseline + table_column_settings_datasets
     return table_column_settings
 
 
-# CHANGE HERE WHEN NEW COMPANY IS ADDED
-def update_municipalities_in_table_data_dict_list(inputdf, fxn_verbose=0):
+# @CH@ CHANGE HERE WHEN NEW COMPANY IS ADDED
+# info of columns should be present in visualisation_parameters.json
+def update_municipalities_in_table_data_dict_list(inputdf, ui_dict, fxn_verbose=0):
     # shows all the municipalities that are present in the data table on the map
     if fxn_verbose > 0:
         print("\n[FUNCTION] update_municipalities_in_table_data_dict_list")
@@ -577,17 +579,40 @@ def update_municipalities_in_table_data_dict_list(inputdf, fxn_verbose=0):
     toprow = "<b>" + inputdf["uniform_city_name"] + "</b><br>"
     inwoners = "<br>" + "Einwohner    : " + inputdf["insgesamt"].astype(int).astype(str)
 
-    # CHANGE HERE WHEN NEW COMPANY IS ADDED
-    cnt_bk = "<br>" + "# Burgerking : " + inputdf["count_BK"].astype(int).astype(str)
-    cnt_mcd = "<br>" + "# Mc Donalds : " + inputdf["count_McD"].astype(int).astype(str)
-    cnt_kfc = "<br>" + "# KFC        : " + inputdf["count_KFC"].astype(int).astype(str)
-    cnt_mft = "<br>" + "# MacFIT     : " + inputdf["count_MFT"].astype(int).astype(str)
-    cnt_ftx = "<br>" + "# FitX       : " + inputdf["count_FTX"].astype(int).astype(str)
+    hovertext_baseline = toprow + inwoners
 
-    # CHANGE HERE WHEN NEW COMPANY IS ADDED
-    # create column with specific hovertext
-    inputdf["hovertext"] = toprow + inwoners + cnt_bk + cnt_mcd + cnt_kfc + cnt_mft + cnt_ftx
+    max_hovertxt_len = 0
+    for dataset in ui_dict["to_use"]:  # loop over all required datasets
+        if len(ui_dict[dataset]["hovertext"]) > max_hovertxt_len:
+            max_hovertxt_len = len(ui_dict[dataset]["hovertext"])
 
+    hovertxt = ""
+    hovertext_datasets = ""
+    for dataset in ui_dict["to_use"]:  # loop over all required datasets
+        hovercnt = inputdf[ui_dict[dataset]["columnname"]].astype(int).astype(str)
+        #
+        # ToDo: should change the fonttype of hover text to uniform spaced
+        #
+        space_txt = " " * (max_hovertxt_len + 1 - len(ui_dict[dataset]["hovertext"]))
+        space_txt = ""
+        hovertxt = "<br>" + "# " + ui_dict[dataset]["hovertext"] + space_txt + " : " + hovercnt
+        hovertext_datasets = hovertext_datasets + hovertxt  # get column name for that dataset
+
+    # # @CH@ CHANGE HERE WHEN NEW COMPANY IS ADDED
+    # cnt_bk = "<br>" + "# Burgerking : " + inputdf["count_BK"].astype(int).astype(str)
+    # cnt_mcd = "<br>" + "# Mc Donalds : " + inputdf["count_McD"].astype(int).astype(str)
+    # cnt_kfc = "<br>" + "# KFC        : " + inputdf["count_KFC"].astype(int).astype(str)
+    # cnt_mft = "<br>" + "# MacFIT     : " + inputdf["count_MFT"].astype(int).astype(str)
+    # cnt_ftx = "<br>" + "# FitX       : " + inputdf["count_FTX"].astype(int).astype(str)
+    # cnt_jrd = "<br>" + "# John Reed  : " + inputdf["count_JRD"].astype(int).astype(str)
+    # cnt_pgd = "<br>" + "# PlayGrounds: " + inputdf["count_PGD"].astype(int).astype(str)
+    #
+    #
+    # # @CH@ CHANGE HERE WHEN NEW COMPANY IS ADDED
+    # # create column with specific hovertext
+    # inputdf["hovertext"] = toprow + inwoners + cnt_bk + cnt_mcd + cnt_kfc + cnt_mft + cnt_ftx + cnt_jrd + cnt_pgd
+
+    inputdf["hovertext"] = hovertext_baseline + hovertext_datasets
     if len(inputdf) >= 1:
         # print(inputdf.columns)
         municipalities_in_table_dict = dict(
@@ -660,7 +685,7 @@ def update_overall_map(the_zoom, the_center, fxn_verbose=0):
             df_selected_municipality, selected_municipality_subset, fxn_verbose
         )
         + update_municipalities_in_table_data_dict_list(
-            glb_updated_tabledata, fxn_verbose
+            glb_updated_tabledata, datasets_ui_dict, fxn_verbose
         )
         + point_on_map_data_dict_list(
             df_point_on_map_filtered, "selected Location", fxn_verbose
@@ -1135,19 +1160,19 @@ app.layout = html.Div(
                             DropDownOptions=netzknoten_options,
                             DropDownOptionTitle="Netzknoten options"
                         ),
-                        html.Br(),
-                        rows.SWITCH_AND_SELECTION_ROW(
-                            SelectionName=prediction_selection_text,
-                            SelectionText="Show predicted locations",
-                            DropDownPlaceholderText="Select 1 or more predictions",
-                            DropDownOptions=prediction_options,
-                            DropDownOptionTitle="Prediction type options"
-                        ),
+###                        html.Br(),
+###                            rows.SWITCH_AND_SELECTION_ROW(
+###                            SelectionName=prediction_selection_text,
+###                            SelectionText="Show predicted locations",
+###                            DropDownPlaceholderText="Select 1 or more predictions",
+###                            DropDownOptions=prediction_options,
+###                            DropDownOptionTitle="Prediction type options"
+###                        ),
                         html.Br(),
                         rows.DATATABLE_RESULTS_ROW(
                             RadioItemOptions=datatable_radio_options,
                             RadioItemValue=default_radio_item_selection,
-                            TableColumnSettings=settings_table_columns(),
+                            TableColumnSettings=settings_table_columns(datasets_ui_dict),
                         ),
                     ],
                     width=6,
@@ -1236,8 +1261,8 @@ app.layout = html.Div(
     ),  # use value from dropdown
     Input(netzknoten_selection_text + "-switch", "on"),  # use value from switch
     Input(netzknoten_selection_text + "-selection", "value"),  # use value from dropdown
-    Input(prediction_selection_text + "-switch", "on"),  # use value from switch
-    Input(prediction_selection_text + "-selection", "value"),  # use value from dropdown
+###    Input(prediction_selection_text + "-switch", "on"),  # use value from switch
+###    Input(prediction_selection_text + "-selection", "value"),  # use value from dropdown
     Input("mapbox", "clickData"),  # use data from click event
     Input("mapbox", "relayoutData"),  # use zoom value and center from mapbox update
     # https://dash.plotly.com/dash-core-components/graph
@@ -1262,8 +1287,8 @@ def update_overview(
     i_municipality_list,
     i_netzknoten_active,
     i_netzknoten_list,
-    i_prediction_active,
-    i_prediction_list,
+###    i_prediction_active,
+###    i_prediction_list,
     i_graph_clickdata,
     i_graph_relayoutdata,
     i_selected_municipality_name,  # the name of the municipality in the selection box
@@ -1323,8 +1348,8 @@ def update_overview(
         print("i_municipality_list         :", i_municipality_list)
         print("i_netzknoten_active         :", i_netzknoten_active)
         print("i_netzknoten_list           :", i_netzknoten_list)
-        print("i_prediction_active         :", i_prediction_active)
-        print("i_prediction_list           :", i_prediction_list)
+###        print("i_prediction_active         :", i_prediction_active)
+###        print("i_prediction_list           :", i_prediction_list)
         print("i_graph_clickdata           :", i_graph_clickdata)
         print("i_graph_relayoutdata:       :", i_graph_relayoutdata)
         print(
@@ -1511,39 +1536,39 @@ def update_overview(
                 glb_df_netzknoten["NK_GeoStrKls"].isin([])
             ].copy()
 
-    # Value in dropdown box with prediction changed
-    # ======================================================
-    if "prediction-selection.value" in changed_id:
-        # filter which datapoints to show on map to show based on status of prediction switch and dropdownbox
-        if i_prediction_active:
-            # filter only the predicted locations and the selections from the list
-            df_prediction_10Km_filtered = df_prediction_10Km[
-                (df_prediction_10Km["select_this_location_prediction"])
-            ].copy()
-            df_prediction_10Km_filtered = df_prediction_10Km_filtered[
-                (df_prediction_10Km_filtered["prediction_type"].isin(i_prediction_list))
-            ].copy()
-
-            df_prediction_20Km_filtered = df_prediction_20Km[
-                (df_prediction_20Km["select_this_location_prediction"])
-            ].copy()
-            df_prediction_20Km_filtered = df_prediction_20Km_filtered[
-                (df_prediction_20Km_filtered["prediction_type"].isin(i_prediction_list))
-            ].copy()
-        else:
-            df_prediction_10Km_filtered = df_prediction_10Km[
-                (df_prediction_10Km["select_this_location_prediction"])
-            ].copy()
-            df_prediction_10Km_filtered = df_prediction_10Km_filtered[
-                (df_prediction_10Km_filtered["prediction_type"].isin([]))
-            ].copy()
-
-            df_prediction_20Km_filtered = df_prediction_20Km[
-                (df_prediction_20Km["select_this_location_prediction"])
-            ].copy()
-            df_prediction_20Km_filtered = df_prediction_20Km_filtered[
-                (df_prediction_20Km_filtered["prediction_type"].isin([]))
-            ].copy()
+### # # Value in dropdown box with prediction changed
+    # # ======================================================
+    # if "prediction-selection.value" in changed_id:
+    #     # filter which datapoints to show on map to show based on status of prediction switch and dropdownbox
+    #     if i_prediction_active:
+    #         # filter only the predicted locations and the selections from the list
+    #         df_prediction_10Km_filtered = df_prediction_10Km[
+    #             (df_prediction_10Km["select_this_location_prediction"])
+    #         ].copy()
+    #         df_prediction_10Km_filtered = df_prediction_10Km_filtered[
+    #             (df_prediction_10Km_filtered["prediction_type"].isin(i_prediction_list))
+    #         ].copy()
+    #
+    #         df_prediction_20Km_filtered = df_prediction_20Km[
+    #             (df_prediction_20Km["select_this_location_prediction"])
+    #         ].copy()
+    #         df_prediction_20Km_filtered = df_prediction_20Km_filtered[
+    #             (df_prediction_20Km_filtered["prediction_type"].isin(i_prediction_list))
+    #         ].copy()
+    #     else:
+    #         df_prediction_10Km_filtered = df_prediction_10Km[
+    #             (df_prediction_10Km["select_this_location_prediction"])
+    #         ].copy()
+    #         df_prediction_10Km_filtered = df_prediction_10Km_filtered[
+    #             (df_prediction_10Km_filtered["prediction_type"].isin([]))
+    #         ].copy()
+    #
+    #         df_prediction_20Km_filtered = df_prediction_20Km[
+    #             (df_prediction_20Km["select_this_location_prediction"])
+    #         ].copy()
+    #         df_prediction_20Km_filtered = df_prediction_20Km_filtered[
+    #             (df_prediction_20Km_filtered["prediction_type"].isin([]))
+### #         ].copy()
 
     # Value of radio button changed
     # ======================================================
@@ -1705,6 +1730,7 @@ def update_overview(
         datatable_lat,
         glb_datatable_geojson,
         datatable_mun,
+        datasets_ui_dict,
         datatable_typ,
         glb_fxn_verbose,
     )
@@ -1785,6 +1811,9 @@ def status_company_selection(
             html.Div(["KFC"], style={"color": "green", "marginRight": "10px"}),
             html.Div(["McFIT"], style={"color": "orange", "marginRight": "10px"}),
             html.Div(["FitX"], style={"color": "purple", "marginRight": "10px"}),
+            html.Div(["John Reed"], style={"color": "dark green", "marginRight": "10px"}),
+            html.Div(["PlayGrounds"], style={"color": "dark blue", "marginRight": "10px"}),
+
         ]
 
     return o_switch_set, o_legend_text
@@ -1870,57 +1899,57 @@ def status_netzknoten_selection(
 
     return o_switch_set
 
-
-####################################################
-# enabling prediction selection dropdown based on status switch
-####################################################
-@app.callback(
-    # Where the results of the function end up
-    # =======================================
-    Output(
-        "prediction-selection", "disabled"
-    ),  # enable/disable dropdownbox functionality
-    Output("prediction-legend-col", "children"),
-    # Changes in (one of) these fires this callback
-    # =============================================
-    Input("prediction-switch", "on"),  # use value from switch
-    Input("prediction-selection", "value")
-    # Remarks
-    # =============================================
-    # Input vars in function should start with i_
-    # State vars in function should start with s_
-    # Output vars from function should start with o_
-    #
-)
-def status_prediction_selection(
-    # Input()
-    i_switch_val,
-    i_selection_val
-    # State()
-):
-    if not i_switch_val:  # disabled the selection options trough switch
-        o_switch_set = True
-    else:  # enabled the selection options
-        o_switch_set = False
-
-    if len(i_selection_val) == 0:  # empty selection text
-        o_legend_text = []
-    else:  # some selections made
-        o_legend_text = [
-            html.Div(
-                ["PREDICTION POINTS:"],
-                style={"fontWeight": "bold", "color": "black", "marginRight": "10px"},
-            ),
-            html.Div(
-                ["10 Km / Min Zone"], style={"color": "cyan", "marginRight": "10px"}
-            ),
-            html.Div(
-                ["20 Km / Min Zone"], style={"color": "fuchsia", "marginRight": "10px"}
-            ),
-        ]
-
-    return o_switch_set, o_legend_text
-
+###
+# ####################################################
+# # enabling prediction selection dropdown based on status switch
+# ####################################################
+# @app.callback(
+#     # Where the results of the function end up
+#     # =======================================
+#     Output(
+#         "prediction-selection", "disabled"
+#     ),  # enable/disable dropdownbox functionality
+#     Output("prediction-legend-col", "children"),
+#     # Changes in (one of) these fires this callback
+#     # =============================================
+#     Input("prediction-switch", "on"),  # use value from switch
+#     Input("prediction-selection", "value")
+#     # Remarks
+#     # =============================================
+#     # Input vars in function should start with i_
+#     # State vars in function should start with s_
+#     # Output vars from function should start with o_
+#     #
+# )
+# def status_prediction_selection(
+#     # Input()
+#     i_switch_val,
+#     i_selection_val
+#     # State()
+# ):
+#     if not i_switch_val:  # disabled the selection options trough switch
+#         o_switch_set = True
+#     else:  # enabled the selection options
+#         o_switch_set = False
+#
+#     if len(i_selection_val) == 0:  # empty selection text
+#         o_legend_text = []
+#     else:  # some selections made
+#         o_legend_text = [
+#             html.Div(
+#                 ["PREDICTION POINTS:"],
+#                 style={"fontWeight": "bold", "color": "black", "marginRight": "10px"},
+#             ),
+#             html.Div(
+#                 ["10 Km / Min Zone"], style={"color": "cyan", "marginRight": "10px"}
+#             ),
+#             html.Div(
+#                 ["20 Km / Min Zone"], style={"color": "fuchsia", "marginRight": "10px"}
+#             ),
+#         ]
+#
+#     return o_switch_set, o_legend_text
+###
 
 ####################################################
 # START THE APP

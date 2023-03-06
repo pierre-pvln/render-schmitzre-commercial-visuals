@@ -1,0 +1,62 @@
+{
+	"local_dataset": {
+		"folderpath_commercial": "./data/final/com/",
+		"folderpath_government": "./data/final/gov/",
+		"folderpath_prediction": "./data/final/pct/"
+	},
+	"datalake": {
+		"AWS_profile_name": "ipheion",
+		"s3_bucket_name": "iph-immo-science",
+		"s3_folder_prefix_commercial": "final/com/",
+		"s3_folder_prefix_government": "final/gov/",
+		"s3_folder_prefix_prediction": "final/pct/"
+	},
+	"data": {
+		"to_use": ["Burgerking", "McDonalds", "KentuckyFriedChicken", "MacFIT", "FitX", "JohnReed", "PlayGrounds"],
+        "Burgerking": {
+			"color": "blue",
+			"columnname": "count_BK",
+			"tablecolumnname" : "Anzahl BK",
+			"hovertext" : "Burgerking"
+		},
+        "McDonalds": {
+			"color": "red",
+			"columnname": "count_McD",
+			"tablecolumnname" : "Anzahl McD",
+			"hovertext" : "Mc Donalds"
+		},
+        "KentuckyFriedChicken": {
+			"color": "green",
+			"columnname": "count_KFC",
+			"tablecolumnname" : "Anzahl KCF",
+			"hovertext" : "KFC"
+		},
+        "MacFIT": {
+			"color": "orange",
+			"columnname": "count_MFT",
+			"tablecolumnname" : "Anzahl MFT",
+			"hovertext" : "MacFIT"
+		},
+        "FitX": {
+			"color": "purple",
+			"columnname": "count_FTX",
+			"tablecolumnname" : "Anzahl FTX",
+			"hovertext" : "FitX"
+		},
+        "JohnReed": {
+			"color": "dark green",
+			"columnname": "count_JRD",
+			"tablecolumnname" : "Anzahl JRD",
+			"hovertext" : "John Reed"
+		},
+        "PlayGrounds": {
+			"color": "light blue",
+			"columnname": "count_PGD",
+			"tablecolumnname" : "Anzahl PGD",
+			"hovertext" : "Playgrounds"
+		}
+    },
+	"generic": {
+		"max_excel_lines": 1048576
+	}
+}

@@ -174,7 +174,7 @@ def company_data_dict_list(inputdf, subset_name, fxn_verbose=0):
         # Set marker colors based on values
         # https://stackoverflow.com/questions/61686382/change-the-text-color-of-cells-in-plotly-table-based-on-value-string
 
-        # CHANGE HERE WHEN NEW COMPANY IS ADDED
+        # @CH@ CHANGE HERE WHEN NEW COMPANY IS ADDED
         marker=dict(
             symbol="circle",  # name of icon in icon set or "circle"
             size=10,
@@ -184,6 +184,8 @@ def company_data_dict_list(inputdf, subset_name, fxn_verbose=0):
                 else "green" if x == "KentuckyFriedChicken"
                 else "orange" if x == "McFIT"
                 else "purple" if x == "FitX"
+                else "dark green" if x == "JohnReed"
+                else "light blue" if x == "PlayGrounds"
                 else "yellow"
                 for x in list(inputdf["enterprise"])
             ],
