@@ -12,27 +12,27 @@
 		"s3_folder_prefix_prediction": "final/pct/"
 	},
 	"data": {
-		"to_use": ["Burgerking", "McDonalds", "KentuckyFriedChicken", "MacFIT", "FitX", "JohnReed", "PlayGrounds"],
-        "Burgerking": {
-			"color": "blue",
+		"to_use": ["BurgerKing", "McDonalds", "KentuckyFriedChicken", "McFIT", "FitX", "AiFitness", "JohnReed", "IndoorPlayGrounds", "OutdoorPlayGrounds"] ,
+        "BurgerKing": {
+			"color": "coral",
 			"columnname": "count_BK",
 			"tablecolumnname" : "Anzahl BK",
 			"hovertext" : "Burgerking"
 		},
         "McDonalds": {
-			"color": "red",
+			"color": "orangered",
 			"columnname": "count_McD",
 			"tablecolumnname" : "Anzahl McD",
 			"hovertext" : "Mc Donalds"
 		},
         "KentuckyFriedChicken": {
-			"color": "green",
+			"color": "orange",
 			"columnname": "count_KFC",
 			"tablecolumnname" : "Anzahl KCF",
 			"hovertext" : "KFC"
 		},
-        "MacFIT": {
-			"color": "orange",
+        "McFIT": {
+			"color": "green",
 			"columnname": "count_MFT",
 			"tablecolumnname" : "Anzahl MFT",
 			"hovertext" : "MacFIT"
@@ -43,17 +43,35 @@
 			"tablecolumnname" : "Anzahl FTX",
 			"hovertext" : "FitX"
 		},
+		"AiFitness": {
+			"color": "pink",
+			"columnname": "count_AIF",
+			"tablecolumnname" : "Anzahl AIF",
+			"hovertext" : "AiFitness"
+		},
         "JohnReed": {
-			"color": "dark green",
+			"color": "darkgreen",
 			"columnname": "count_JRD",
 			"tablecolumnname" : "Anzahl JRD",
 			"hovertext" : "John Reed"
 		},
         "PlayGrounds": {
-			"color": "light blue",
+			"color": "deepskyblue",
 			"columnname": "count_PGD",
 			"tablecolumnname" : "Anzahl PGD",
 			"hovertext" : "Playgrounds"
+		},
+        "IndoorPlayGrounds": {
+			"color": "blue",
+			"columnname": "count_IPG",
+			"tablecolumnname" : "Anzahl IPG",
+			"hovertext" : "IndoorPlaygrounds"
+		},
+        "OutdoorPlayGrounds": {
+			"color": "darkblue",
+			"columnname": "count_OPG",
+			"tablecolumnname" : "Anzahl OPG",
+			"hovertext" : "OutdoorPlaygrounds"
 		}
     },
 	"generic": {

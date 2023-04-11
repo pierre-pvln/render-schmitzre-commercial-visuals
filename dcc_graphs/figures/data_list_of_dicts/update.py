@@ -3,9 +3,11 @@ def point_on_map_data_dict_list(inputdf, subset_name, fxn_verbose=0):
         print()
         print("[FUNCTION] point_on_map_data_dict_list")
     if fxn_verbose > 1:
+        print("== INPUT ====================")
         print("len inputdf    :", len(inputdf))
         print("columns inputdf:", inputdf.columns)
         print("subset_name    :", subset_name)
+        print("== DONE =====================")
 
     point_on_map = dict(
         # https://plotly.com/javascript/reference/scattermapbox/#scattermapbox-type
@@ -52,9 +54,11 @@ def municipality_data_dict_list(inputdf, subset_name, fxn_verbose=0):
         print()
         print("[FUNCTION] point_on_map_data_dict_list")
     if fxn_verbose > 1:
+        print("== INPUT ====================")
         print("len inputdf    :", len(inputdf))
         print("columns inputdf:", inputdf.columns)
         print("subset_name    :", subset_name)
+        print("== DONE =====================")
 
     data_dict_list = []
 
@@ -133,14 +137,26 @@ def municipality_data_dict_list(inputdf, subset_name, fxn_verbose=0):
     return data_dict_list
 
 
-def company_data_dict_list(inputdf, subset_name, fxn_verbose=0):
+def company_data_dict_list(inputdf, subset_name, ui_dict, fxn_verbose=0):
     if fxn_verbose > 0:
         print()
         print("[FUNCTION] company_data_dict_list")
     if fxn_verbose > 1:
+        print("== INPUT ====================")
         print("len inputdf    :", len(inputdf))
         print("columns inputdf:", inputdf.columns)
         print("subset_name    :", subset_name)
+        print("ui_dict        :", ui_dict)
+        print("== DONE =====================")
+
+    # set colors of marker
+    inputdf['color'] = ""
+    for dataset in ui_dict["to_use"]:  # loop over all required datasets and set color accordingly
+        inputdf.loc[inputdf['enterprise'] == dataset, 'color'] = ui_dict[dataset]["color"]
+
+    # print("=XX=")
+    # print(inputdf[['enterprise', 'color']])
+    # print("=XX=")
 
     company_data_dict = dict(
         # https://plotly.com/javascript/reference/scattermapbox/#scattermapbox-type
@@ -171,25 +187,11 @@ def company_data_dict_list(inputdf, subset_name, fxn_verbose=0):
         hovertemplate="<b>%{hovertext}</b><br><br>"
         + "City: %{customdata}<br>"
         + "<extra>Company</extra>",
-        # Set marker colors based on values
-        # https://stackoverflow.com/questions/61686382/change-the-text-color-of-cells-in-plotly-table-based-on-value-string
-
-        # @CH@ CHANGE HERE WHEN NEW COMPANY IS ADDED
         marker=dict(
             symbol="circle",  # name of icon in icon set or "circle"
             size=10,
-            color=[
-                "blue" if x == "BurgerKing"
-                else "red" if x == "McDonalds"
-                else "green" if x == "KentuckyFriedChicken"
-                else "orange" if x == "McFIT"
-                else "purple" if x == "FitX"
-                else "dark green" if x == "JohnReed"
-                else "light blue" if x == "PlayGrounds"
-                else "yellow"
-                for x in list(inputdf["enterprise"])
-            ],
-            opacity=0.5,
+            color=list(inputdf["color"]),
+            opacity=0.8,
         ),
     )
     return [company_data_dict]
@@ -200,9 +202,11 @@ def netzknoten_data_dict_list(inputdf, subset_name, fxn_verbose=0):
         print()
         print("[FUNCTION] netzknoten_data_dict_list")
     if fxn_verbose > 1:
+        print("== INPUT ====================")
         print("len inputdf    :", len(inputdf))
         print("columns inputdf:", inputdf.columns)
         print("subset_name    :", subset_name)
+        print("== DONE =====================")
 
     nk_data_dict = dict(
         # https://plotly.com/javascript/reference/scattermapbox/#scattermapbox-type
@@ -248,9 +252,11 @@ def prediction_10km_data_dict_list(inputdf, subset_name, fxn_verbose=0):
         print()
         print("[FUNCTION] prediction_10km_data_dict_list")
     if fxn_verbose > 1:
+        print("== INPUT ====================")
         print("len inputdf    :", len(inputdf))
         print("columns inputdf:", inputdf.columns)
         print("subset_name    :", subset_name)
+        print("== DONE =====================")
 
     data_10Km_dict = dict(
         # https://plotly.com/javascript/reference/scattermapbox/#scattermapbox-type
@@ -300,9 +306,11 @@ def prediction_20km_data_dict_list(inputdf, subset_name, fxn_verbose=0):
         print()
         print("[FUNCTION] prediction_20km_data_dict_list")
     if fxn_verbose > 1:
+        print("== INPUT ====================")
         print("len inputdf    :", len(inputdf))
         print("columns inputdf:", inputdf.columns)
         print("subset_name    :", subset_name)
+        print("== DONE =====================")
 
     data_20Km_dict = dict(
         # https://plotly.com/javascript/reference/scattermapbox/#scattermapbox-type
@@ -352,9 +360,11 @@ def selected_municipality_data_dict_list(inputdf, subset_name, fxn_verbose=0):
         print()
         print("[FUNCTION] selected_municipality_data_dict_list")
     if fxn_verbose > 1:
+        print("== INPUT ====================")
         print("len inputdf    :", len(inputdf))
         print("columns inputdf:", inputdf.columns)
         print("subset_name    :", subset_name)
+        print("== DONE =====================")
 
     # shows only the point of the selected municipality on the map
     if len(inputdf) == 1:

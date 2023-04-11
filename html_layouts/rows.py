@@ -111,7 +111,30 @@ def SWITCH_AND_SELECTION_ROW(
     )
 
 
-def DATATABLE_RESULTS_ROW(RadioItemOptions, RadioItemValue, TableColumnSettings):
+def DATATABLE_RESULTS_ROW(RadioItemOptions, RadioItemValue, TableColumnSettings, ui_dict):
+
+    # create styling elements first columns
+    style_cell_pre_text = [
+        {"if": {"column_id": "uniform_city_name"},
+         "width": "160px",
+         "fontSize": "12px",
+         },
+        {"if": {"column_id": "insgesamt"},
+         "width": "30px",
+         "fontSize": "12px",
+         },
+    ]
+
+    # create styling elements per company
+    style_cell_elements = []
+    for dataset in ui_dict["to_use"]:  # loop over all required datasets and create the styling
+        style_cell_elements.append(
+            {
+                "if": {"column_id": ui_dict[dataset]["columnname"]},
+                "width": "25px",
+                "fontSize": "12px",
+            }
+        )
 
     return dbc.Row(  # datatabel overzicht
         [
@@ -153,53 +176,60 @@ def DATATABLE_RESULTS_ROW(RadioItemOptions, RadioItemValue, TableColumnSettings)
                                 style_data={"whiteSpace": "normal", "height": "auto"},
 
                                 # @CH@ CHANGE HERE WHEN NEW COMPANY IS ADDED
-                                style_cell_conditional=[
-                                    {
-                                        "if": {"column_id": "uniform_city_name"},
-                                        "width": "200px",
-                                        "fontSize": "12px",
-                                    },
-                                    {
-                                        "if": {"column_id": "insgesamt"},
-                                        "width": "30px",
-                                        "fontSize": "12px",
-                                    },
-                                    {
-                                        "if": {"column_id": "count_BK"},
-                                        "width": "25px",
-                                        "fontSize": "12px",
-                                    },
-                                    {
-                                        "if": {"column_id": "count_McD"},
-                                        "width": "25px",
-                                        "fontSize": "12px",
-                                    },
-                                    {
-                                        "if": {"column_id": "count_KFC"},
-                                        "width": "25px",
-                                        "fontSize": "12px",
-                                    },
-                                    {
-                                        "if": {"column_id": "count_MFT"},
-                                        "width": "25px",
-                                        "fontSize": "12px",
-                                    },
-                                    {
-                                        "if": {"column_id": "count_FTX"},
-                                        "width": "25px",
-                                        "fontSize": "12px",
-                                    },
-                                    {
-                                        "if": {"column_id": "count_JRD"},
-                                        "width": "25px",
-                                        "fontSize": "12px",
-                                    },
-                                    {
-                                        "if": {"column_id": "count_PGD"},
-                                        "width": "25px",
-                                        "fontSize": "12px",
-                                    },
-                                ],
+                                # combine styling elements
+                                style_cell_conditional=style_cell_pre_text + style_cell_elements,
+                                    #                    [
+                                    # {
+                                    #     "if": {"column_id": "uniform_city_name"},
+                                    #     "width": "200px",
+                                    #     "fontSize": "12px",
+                                    # },
+                                    # {
+                                    #     "if": {"column_id": "insgesamt"},
+                                    #     "width": "30px",
+                                    #     "fontSize": "12px",
+                                    # },
+                                #     {
+                                #         "if": {"column_id": "count_BK"},
+                                #         "width": "25px",
+                                #         "fontSize": "12px",
+                                #     },
+                                #     {
+                                #         "if": {"column_id": "count_McD"},
+                                #         "width": "25px",
+                                #         "fontSize": "12px",
+                                #     },
+                                #     {
+                                #         "if": {"column_id": "count_KFC"},
+                                #         "width": "25px",
+                                #         "fontSize": "12px",
+                                #     },
+                                #     {
+                                #         "if": {"column_id": "count_MFT"},
+                                #         "width": "25px",
+                                #         "fontSize": "12px",
+                                #     },
+                                #     {
+                                #         "if": {"column_id": "count_FTX"},
+                                #         "width": "25px",
+                                #         "fontSize": "12px",
+                                #     },
+                                #     {
+                                #         "if": {"column_id": "count_AIF"},
+                                #         "width": "25px",
+                                #         "fontSize": "12px",
+                                #     },
+                                #     {
+                                #         "if": {"column_id": "count_JRD"},
+                                #         "width": "25px",
+                                #         "fontSize": "12px",
+                                #     },
+                                #     {
+                                #         "if": {"column_id": "count_PGD"},
+                                #         "width": "25px",
+                                #         "fontSize": "12px",
+                                #     },
+                                # ],
                             ),
                             html.Br([],),
                             dash_table.DataTable(
@@ -212,53 +242,60 @@ def DATATABLE_RESULTS_ROW(RadioItemOptions, RadioItemValue, TableColumnSettings)
                                 style_data={"whiteSpace": "normal", "height": "auto"},
 
                                 # @CH@ CHANGE HERE WHEN NEW COMPANY IS ADDED
-                                style_cell_conditional=[
-                                    {
-                                        "if": {"column_id": "uniform_city_name"},
-                                        "width": "200px",
-                                        "fontSize": "12px",
-                                    },
-                                    {
-                                        "if": {"column_id": "insgesamt"},
-                                        "width": "30px",
-                                        "fontSize": "12px",
-                                    },
-                                    {
-                                        "if": {"column_id": "count_BK"},
-                                        "width": "25px",
-                                        "fontSize": "12px",
-                                    },
-                                    {
-                                        "if": {"column_id": "count_McD"},
-                                        "width": "25px",
-                                        "fontSize": "12px",
-                                    },
-                                    {
-                                        "if": {"column_id": "count_KFC"},
-                                        "width": "25px",
-                                        "fontSize": "12px",
-                                    },
-                                    {
-                                        "if": {"column_id": "count_MFT"},
-                                        "width": "25px",
-                                        "fontSize": "12px",
-                                    },
-                                    {
-                                        "if": {"column_id": "count_FTX"},
-                                        "width": "25px",
-                                        "fontSize": "12px",
-                                    },
-                                    {
-                                        "if": {"column_id": "count_JRD"},
-                                        "width": "25px",
-                                        "fontSize": "12px",
-                                    },
-                                    {
-                                        "if": {"column_id": "count_PGD"},
-                                        "width": "25px",
-                                        "fontSize": "12px",
-                                    },
-                                ],
+                                # combine styling elements
+                                style_cell_conditional=style_cell_pre_text + style_cell_elements,
+                                # style_cell_pre_text + [
+                                #     # {
+                                #     #     "if": {"column_id": "uniform_city_name"},
+                                #     #     "width": "200px",
+                                #     #     "fontSize": "12px",
+                                #     # },
+                                #     # {
+                                #     #     "if": {"column_id": "insgesamt"},
+                                #     #     "width": "30px",
+                                #     #     "fontSize": "12px",
+                                #     # },
+                                #     {
+                                #         "if": {"column_id": "count_BK"},
+                                #         "width": "25px",
+                                #         "fontSize": "12px",
+                                #     },
+                                #     {
+                                #         "if": {"column_id": "count_McD"},
+                                #         "width": "25px",
+                                #         "fontSize": "12px",
+                                #     },
+                                #     {
+                                #         "if": {"column_id": "count_KFC"},
+                                #         "width": "25px",
+                                #         "fontSize": "12px",
+                                #     },
+                                #     {
+                                #         "if": {"column_id": "count_MFT"},
+                                #         "width": "25px",
+                                #         "fontSize": "12px",
+                                #     },
+                                #     {
+                                #         "if": {"column_id": "count_FTX"},
+                                #         "width": "25px",
+                                #         "fontSize": "12px",
+                                #     },
+                                #     {
+                                #         "if": {"column_id": "count_AIF"},
+                                #         "width": "25px",
+                                #         "fontSize": "12px",
+                                #     },
+                                #     {
+                                #         "if": {"column_id": "count_JRD"},
+                                #         "width": "25px",
+                                #         "fontSize": "12px",
+                                #     },
+                                #     {
+                                #         "if": {"column_id": "count_PGD"},
+                                #         "width": "25px",
+                                #         "fontSize": "12px",
+                                #     },
+                                # ],
                             ),
                             html.Br([],),
                         ],
@@ -292,15 +329,6 @@ def LEGEND_ROW():
             dbc.Col(
                 [
                     # Start with empty legend text
-                    # html.Div(["ISOCHRONE LINES:"], style={"fontWeight": "bold", "color": "black", "marginRight": "10px"}),
-                    # html.Div(["-* legend updated when selected *-"]),
-                ],
-                id="isochrone-legend-col",
-                width=12,
-            ),
-            dbc.Col(
-                [
-                    # Start with empty legend text
                     # html.Div(["COMMERCIAL POINTS:"], style={"fontWeight": "bold", "color": "black", "marginRight": "10px"}),
                     # html.Div(["Mc Donalds"], style={"color": "red", "marginRight": "10px"}),
                     # html.Div(["Burger King"], style={"color": "blue", "marginRight": "10px"}),
@@ -308,7 +336,16 @@ def LEGEND_ROW():
                     # html.Div(["Expansion"], style={"color": "orange", "marginRight": "10px"}),
                 ],
                 id="company-legend-col",
-                width=4,
+                width=6,
+            ),
+            dbc.Col(
+                [
+                    # Start with empty legend text
+                    # html.Div(["ISOCHRONE LINES:"], style={"fontWeight": "bold", "color": "black", "marginRight": "10px"}),
+                    # html.Div(["-* legend updated when selected *-"]),
+                ],
+                id="isochrone-legend-col",
+                width=6,
             ),
             dbc.Col(
                 [
@@ -318,7 +355,7 @@ def LEGEND_ROW():
                     # html.Div(["20 Km / Min Zone"], style={"color": "fuchsia", "marginRight": "10px"}),
                 ],
                 id="prediction-legend-col",
-                width=4,
+                width=6,
             ),
             dbc.Col(
                 [
@@ -328,7 +365,17 @@ def LEGEND_ROW():
                     # html.Div(["Kreissitz gemeinde"], style={"color": "purple", "marginRight": "10px"}),
                 ],
                 id="municipality-legend-col",
-                width=4,
+                width=6,
+            ),
+            dbc.Col(
+                [
+                    # Start with empty legend text
+                    # html.Div(["MUNICIPALITY POINTS:"], style={"fontWeight": "bold", "color": "black", "marginRight": "10px"}),
+                    # html.Div(["Gemeinde"], style={"color": "black", "marginRight": "10px"}),
+                    # html.Div(["Kreissitz gemeinde"], style={"color": "purple", "marginRight": "10px"}),
+                ],
+                id="netzknoten-legend-col",
+                width=6,
             ),
         ],
         style={  # "borderStyle": "solid",
